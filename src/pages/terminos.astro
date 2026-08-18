@@ -1,0 +1,23 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { site } from '../data/site.js';
+---
+<Layout title="Términos y condiciones" description={`Términos y condiciones de uso del sitio de ${site.name}.`}>
+  <section class="mx-auto max-w-3xl px-5 py-20 md:px-12">
+    <h1 class="mb-6 font-display text-3xl font-semibold text-navy-900 md:text-4xl">Términos y condiciones</h1>
+    <div class="flex flex-col gap-4 font-body leading-relaxed text-stone-600">
+      <p>
+        La información publicada en este sitio tiene fines referenciales y no constituye una
+        oferta vinculante. Los precios, superficies y disponibilidad de las propiedades pueden
+        variar sin previo aviso.
+      </p>
+      <p>
+        Para conocer las condiciones actualizadas de cada propiedad, te invitamos a contactarnos
+        directamente a través de nuestros canales oficiales: {site.phoneDisplay} o {site.email}.
+      </p>
+      <p>
+        © {new Date().getFullYear()} {site.name}. {site.legalTagline}. Todos los derechos reservados.
+      </p>
+    </div>
+  </section>
+</Layout>

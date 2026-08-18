@@ -1,0 +1,295 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PropertyCard from "../components/PropertyCard.astro";
+import Coordinates from "../components/Coordinates.astro";
+import { properties, communes, types } from "../data/properties.js";
+import { site, whatsappLink, telLink } from "../data/site.js";
+
+const featured = properties.slice(0, 5);
+---
+
+<Layout title="Inicio" active="inicio">
+  <!-- HERO -->
+  <section
+    class="relative flex min-h-[70vh] items-center overflow-hidden bg-navy-950 md:min-h-[74vh]"
+  >
+    <div class="absolute inset-0">
+      <img
+        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBORQsOxSVR0hPLCyHFobxIUigMFJixyaTKDS18S7lZoSq2aIDYou3f_zUHARxL0W0qt7U5Jqjia8SO8xQUP-18yHFX5yDl7XzzKT-6ShVoWhClkwhHCVG4bNqDno72jfzuID4lQKCGwgl0XKdkSPlMc9ewdXFPy3T2HlBHsjPI7WdNSp05iqy68uPk25GMvpWZv02g11Aj5O4IHB9LCI1kfBoq-pnCibdauB00Rkzoocd8SIKtTn_iOg"
+        alt="Paisaje de la Región de Ñuble"
+        class="h-full w-full object-cover opacity-70"
+      />
+      <div
+        class="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/70 to-navy-950/30"
+      >
+      </div>
+      <div class="absolute inset-0 bg-grain mix-blend-overlay"></div>
+    </div>
+
+    <div
+      class="relative z-10 mx-auto w-full max-w-7xl px-5 pb-12 pt-0 md:px-12 md:pb-40"
+    >
+      <Coordinates
+        class="mb-6 text-gold-light"
+        label="CORRETAJE E INVERSIONES INMOBILIARIAS"
+      />
+      <h1
+        class="max-w-3xl font-display text-4xl font-semibold leading-[1.08] text-paper md:text-6xl"
+      >
+        Invierte con confianza, en Chile y en el mundo.
+      </h1>
+      <p class="mt-6 max-w-xl font-body text-lg leading-relaxed text-paper/75">
+        {site.impactPhrase}
+      </p>
+      <div class="mt-9 flex flex-wrap gap-4">
+        <a href="/propiedades" class="btn-gold">Ver propiedades</a>
+        <a
+          href="/contacto"
+          class="btn-outline border-paper/40 text-paper hover:border-paper hover:bg-paper/10"
+        >
+          Quiero asesoría personalizada
+        </a>
+      </div>
+    </div>
+
+    <!-- floating search card -->
+    <div class="absolute inset-x-5 bottom-8 z-10 hidden md:inset-x-12 md:block">
+      <form
+        action="/propiedades"
+        class="mx-auto flex max-w-5xl flex-col gap-4 rounded-sm bg-white p-6 shadow-cardLg md:flex-row md:items-end"
+      >
+        <div class="flex-1">
+          <label class="field-label" for="q-type">Tipo de propiedad</label>
+          <select id="q-type" name="type" class="field">
+            <option value="">Todos los tipos</option>
+            {types.map((t) => <option value={t}>{t}</option>)}
+          </select>
+        </div>
+        <div class="flex-1">
+          <label class="field-label" for="q-commune">Comuna</label>
+          <select id="q-commune" name="commune" class="field">
+            <option value="">Toda la región</option>
+            {communes.map((c) => <option value={c}>{c}</option>)}
+          </select>
+        </div>
+        <button type="submit" class="btn-primary md:w-auto">
+          Buscar propiedades
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Mobile search (stacked below hero) -->
+  <section class="bg-navy-950 px-5 pb-10 pt-6 md:hidden">
+    <form
+      action="/propiedades"
+      class="flex flex-col gap-3 rounded-sm bg-white p-5 shadow-cardLg"
+    >
+      <div>
+        <label class="field-label" for="q-type-m">Tipo</label>
+        <select id="q-type-m" name="type" class="field">
+          <option value="">Todos los tipos</option>
+          {types.map((t) => <option value={t}>{t}</option>)}
+        </select>
+      </div>
+      <div>
+        <label class="field-label" for="q-commune-m">Comuna</label>
+        <select id="q-commune-m" name="commune" class="field">
+          <option value="">Toda la región</option>
+          {communes.map((c) => <option value={c}>{c}</option>)}
+        </select>
+      </div>
+      <button type="submit" class="btn-primary w-full"
+        >Buscar propiedades</button
+      >
+    </form>
+  </section>
+
+  <!-- FEATURED PROPERTIES (lo primero que se ve) -->
+  <section class="py-16 md:py-24">
+    <div class="mx-auto max-w-7xl px-5 md:px-12">
+      <div
+        class="mb-10 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end"
+      >
+        <div>
+          <p class="eyebrow mb-3">Selección actual</p>
+          <h2
+            class="font-display text-3xl font-semibold text-navy-900 md:text-4xl"
+          >
+            Propiedades destacadas
+          </h2>
+        </div>
+        <a href="/propiedades" class="btn-outline">Ver todo el catálogo</a>
+      </div>
+
+      <!-- Fila Superior -->
+      <div class="mb-6 grid grid-cols-1 gap-6 md:grid-cols-3">
+        {
+          featured.slice(0, 2).map((p, i) => (
+            <div
+              class={
+                i === 0
+                  ? "md:col-span-2 flex [&>*]:w-full"
+                  : "md:col-span-1 flex [&>*]:w-full"
+              }
+            >
+              <PropertyCard property={p} featured={i === 0} />
+            </div>
+          ))
+        }
+      </div>
+
+      <!-- Fila Inferior -->
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+        {featured.slice(2, 5).map((p) => <PropertyCard property={p} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- ASESORÍA: comprar, arrendar o vender -->
+  <section class="border-t border-stone-200 bg-stone-50 py-16 md:py-20">
+    <div class="mx-auto max-w-7xl px-5 md:px-12">
+      <div class="mb-10 max-w-2xl">
+        <p class="eyebrow mb-3">
+          Comprar, arrendar o invertir con asesoría experta
+        </p>
+        <h2
+          class="font-display text-3xl font-semibold text-navy-900 md:text-4xl"
+        >
+          Te acompañamos en cada paso de tu próxima propiedad
+        </h2>
+        <p class="mt-4 font-body leading-relaxed text-stone-600">
+          Ya sea que busques comprar, arrendar o invertir, te asesoramos con
+          información real del mercado. Y si lo que buscas es vender o arrendar
+          tu propiedad, también te ayudamos a definir el precio justo para
+          concretar un negocio rápido y sin perder dinero.
+        </p>
+      </div>
+      <div class="grid grid-cols-1 gap-10 md:grid-cols-3">
+        {
+          site.evaluationSteps.map((step, i) => (
+            <div class="flex flex-col gap-2 border-t border-stone-300 pt-4">
+              <span class="font-display text-2xl text-gold-dark">0{i + 1}</span>
+              <h3 class="font-display text-lg font-semibold text-navy-900">
+                {step.title}
+              </h3>
+              <p class="font-body text-sm leading-relaxed text-stone-600">
+                {step.text}
+              </p>
+            </div>
+          ))
+        }
+      </div>
+      <a
+        href={whatsappLink()}
+        target="_blank"
+        rel="noopener"
+        class="btn-primary mt-10 inline-flex"
+      >
+        Quiero vender o arrendar mi propiedad
+      </a>
+    </div>
+  </section>
+
+  <!-- QUIÉNES SOMOS / SERVICIOS -->
+  <section class="mx-auto max-w-7xl px-5 py-16 md:px-12 md:py-20">
+    <p class="eyebrow mb-3">A qué nos dedicamos</p>
+    <h2
+      class="mb-10 max-w-2xl font-display text-3xl font-semibold text-navy-900 md:text-4xl"
+    >
+      Conectamos personas e inversionistas con las mejores oportunidades
+    </h2>
+    <div
+      class="grid grid-cols-1 divide-y divide-stone-200 border-y border-stone-200 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4"
+    >
+      {
+        site.services.map((s) => (
+          <div class="flex flex-col gap-2 px-0 py-6 sm:px-6 sm:py-0">
+            <h3 class="font-display text-lg font-semibold text-navy-900">
+              {s.title}
+            </h3>
+            <p class="font-body text-sm leading-relaxed text-stone-600">
+              {s.text}
+            </p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- ¿No encuentras tu propiedad? -->
+  <section class="border-t border-stone-200 bg-stone-50 py-16 md:py-20">
+    <div
+      class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-5 md:grid-cols-2 md:px-12"
+    >
+      <div>
+        <p class="eyebrow mb-3">Búsqueda a la medida</p>
+        <h2
+          class="font-display text-3xl font-semibold text-navy-900 md:text-4xl"
+        >
+          ¿No encuentras la propiedad que buscas? Nosotros la encontramos por ti
+        </h2>
+        <p class="mt-4 font-body leading-relaxed text-stone-600">
+          Sabemos que tu tiempo es valioso. Si no encuentras el inmueble ideal
+          en nuestro catálogo, activamos nuestra red de contactos a nivel
+          regional, nacional e internacional para encontrar la propiedad exacta
+          que se adapte a tus necesidades o metas de inversión.
+        </p>
+        <p class="mt-3 font-body font-medium text-navy-900">
+          Cuéntanos qué necesitas y nosotros nos encargamos de todo el proceso
+          legal y comercial.
+        </p>
+        <a
+          href={whatsappLink()}
+          target="_blank"
+          rel="noopener"
+          class="btn-primary mt-6 inline-flex"
+        >
+          Cuéntanos qué buscas
+        </a>
+      </div>
+      <ul class="flex flex-col gap-4">
+        {
+          site.pillars.map((p) => (
+            <li class="border-l-2 border-gold pl-4">
+              <h4 class="font-display text-base font-semibold text-navy-900">
+                {p.title}
+              </h4>
+              <p class="mt-1 font-body text-sm leading-relaxed text-stone-600">
+                {p.text}
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="mx-auto max-w-7xl px-5 py-16 md:px-12 md:py-20">
+    <div
+      class="flex flex-col items-center gap-6 rounded-sm bg-navy-800 px-8 py-16 text-center md:px-16"
+    >
+      <Coordinates label="ASESORÍA PERSONALIZADA" class="text-gold-light" />
+      <h2
+        class="max-w-2xl font-display text-3xl font-semibold text-paper md:text-4xl"
+      >
+        ¿Listo para dar el siguiente paso?
+      </h2>
+      <p class="max-w-lg font-body text-paper/75">
+        Conversemos sobre tu próxima compra, venta, arriendo o inversión.
+        Primera consulta sin compromiso.
+      </p>
+      <div class="mt-2 flex flex-wrap justify-center gap-4">
+        <a href={whatsappLink()} target="_blank" rel="noopener" class="btn-gold"
+          >Escribir por WhatsApp</a
+        >
+        <a
+          href={telLink()}
+          class="btn-outline border-paper/40 text-paper hover:border-paper hover:bg-paper/10"
+          >Llamar ahora</a
+        >
+      </div>
+    </div>
+  </section>
+</Layout>

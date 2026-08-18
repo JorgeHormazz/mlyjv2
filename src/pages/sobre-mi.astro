@@ -1,0 +1,121 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Coordinates from "../components/Coordinates.astro";
+import { site, whatsappLink } from "../data/site.js";
+---
+
+<Layout
+  title="Quiénes somos"
+  active="sobre-mi"
+  description="ML y JV PROPIEDADES: empresa de corretaje e inversiones inmobiliarias nacida en Chillán, Región de Ñuble, con alcance nacional e internacional."
+>
+  <section
+    class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-5 py-20 md:grid-cols-12 md:px-12"
+  >
+    <div class="flex flex-col gap-6 md:col-span-7">
+      <Coordinates label="QUIÉNES SOMOS" />
+      <h1 class="font-display text-4xl font-semibold leading-tight text-navy-900 md:text-5xl">
+        Corretaje e inversiones con visión local y alcance global.
+      </h1>
+      <p class="font-body text-lg leading-relaxed text-stone-600">
+        En {site.name} somos una empresa de corretaje e inversiones inmobiliarias nacida y
+        establecida en Chillán, Región de Ñuble, Chile. Desde nuestra región operamos con una
+        visión de alcance local, nacional e internacional, enfocándonos en entregar un servicio
+        exclusivo, personalizado y de alta confianza.
+      </p>
+      <p class="font-body leading-relaxed text-stone-600">
+        Más que ofrecer un catálogo masivo, nos especializamos en la búsqueda y gestión
+        estratégica de activos a la medida de cada cliente. Analizamos el mercado de forma
+        personalizada para conectar a personas e inversionistas con las mejores oportunidades.
+      </p>
+      <div class="flex flex-col gap-3 pt-2 sm:flex-row">
+        <a href="/contacto" class="btn-primary">Agendar una conversación</a>
+        <a href="/propiedades" class="btn-outline">Ver propiedades destacadas</a>
+      </div>
+    </div>
+    <div class="md:col-span-5">
+      <div class="flex flex-col items-center gap-6 rounded-sm bg-navy-950 p-10 text-center shadow-cardLg">
+        <img src="/logo.png" alt={site.name} class="h-32 w-32 rounded-sm object-contain" />
+        <p class="font-display text-xl font-semibold text-gold-light">{site.name}</p>
+        <p class="font-ui text-xs uppercase tracking-widest2 text-paper/60">{site.legalTagline}</p>
+        <p class="font-body text-sm leading-relaxed text-paper/70">
+          Nacida y establecida en Chillán, Región de Ñuble.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MISIÓN Y VISIÓN -->
+  <section class="border-t border-stone-200 bg-stone-50 py-20">
+    <div class="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-5 md:grid-cols-2 md:px-12">
+      <div>
+        <p class="eyebrow mb-3">Nuestra misión</p>
+        <h2 class="mb-4 font-display text-2xl font-semibold text-navy-900 md:text-3xl">
+          Multiplicar tu patrimonio con tranquilidad
+        </h2>
+        <p class="font-body leading-relaxed text-stone-600">{site.mission}</p>
+      </div>
+      <div>
+        <p class="eyebrow mb-3">Nuestra visión — 2030</p>
+        <h2 class="mb-4 font-display text-2xl font-semibold text-navy-900 md:text-3xl">
+          Referentes en corretaje e inversiones
+        </h2>
+        <p class="font-body leading-relaxed text-stone-600">{site.vision}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- OBJETIVOS Y COMPROMISOS -->
+  <section class="py-20">
+    <div class="mx-auto max-w-7xl px-5 md:px-12">
+      <p class="eyebrow mb-3">Objetivos y compromisos</p>
+      <h2 class="mb-12 max-w-2xl font-display text-3xl font-semibold text-navy-900 md:text-4xl">
+        Tu tranquilidad es nuestra prioridad
+      </h2>
+      <div class="grid grid-cols-1 gap-10 md:grid-cols-2">
+        {
+          site.pillars.map((v, i) => (
+            <div class="border-l-2 border-gold pl-5">
+              <p class="font-ui text-xs font-semibold text-gold-dark">0{i + 1}</p>
+              <h3 class="mt-1 font-display text-lg font-semibold text-navy-900">{v.title}</h3>
+              <p class="mt-2 font-body text-sm leading-relaxed text-stone-600">{v.text}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- QUÉ HACEMOS -->
+  <section class="border-t border-stone-200 bg-stone-50 py-20">
+    <div class="mx-auto max-w-7xl px-5 md:px-12">
+      <p class="eyebrow mb-3">Especialidades</p>
+      <h2 class="mb-12 max-w-2xl font-display text-3xl font-semibold text-navy-900 md:text-4xl">
+        Dónde encontramos las mejores oportunidades para ti
+      </h2>
+      <div class="grid grid-cols-1 divide-y divide-stone-200 border-y border-stone-200 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
+        {site.services.map((s) => (
+          <div class="flex flex-col gap-2 px-0 py-6 sm:px-6 sm:py-0">
+            <h3 class="font-display text-base font-semibold text-navy-900">{s.title}</h3>
+            <p class="font-body text-sm leading-relaxed text-stone-600">{s.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="mx-auto flex max-w-3xl flex-col items-center gap-5 px-5 py-24 text-center md:px-12"
+  >
+    <h2 class="font-display text-3xl font-semibold text-navy-900 md:text-4xl">
+      ¿Listo para dar el siguiente paso?
+    </h2>
+    <p class="font-body text-stone-600">
+      Contáctanos hoy para una consulta inicial sin compromiso.
+    </p>
+    <div class="mt-2 flex flex-col gap-3 sm:flex-row">
+      <a href={whatsappLink()} target="_blank" rel="noopener" class="btn-primary">Escribir por WhatsApp</a>
+      <a href="/propiedades" class="btn-outline">Ver propiedades</a>
+    </div>
+  </section>
+</Layout>

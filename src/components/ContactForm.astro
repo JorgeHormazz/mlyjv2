@@ -1,0 +1,49 @@
+---
+interface Props {
+  compact?: boolean;
+  presetSubject?: string;
+}
+const { compact = false, presetSubject = '' } = Astro.props;
+---
+<form class="flex flex-col gap-5" method="POST" action="#" name="contacto">
+  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+    <div>
+      <label class="field-label" for="name">Nombre completo</label>
+      <input class="field" id="name" name="name" type="text" placeholder="Juan Pérez" required />
+    </div>
+    <div>
+      <label class="field-label" for="phone">Teléfono</label>
+      <input class="field" id="phone" name="phone" type="tel" placeholder="+56 9 1234 5678" />
+    </div>
+  </div>
+  <div>
+    <label class="field-label" for="email">Correo electrónico</label>
+    <input class="field" id="email" name="email" type="email" placeholder="juan@ejemplo.com" required />
+  </div>
+  {!compact && (
+    <div>
+      <label class="field-label" for="subject">Asunto</label>
+      <select class="field" id="subject" name="subject">
+        <option selected={presetSubject === 'Comprar propiedad'}>Comprar propiedad</option>
+        <option selected={presetSubject === 'Arrendar propiedad'}>Arrendar propiedad</option>
+        <option selected={presetSubject === 'Asesoría general'}>Asesoría general</option>
+        <option selected={presetSubject === 'Vender o arrendar mi propiedad'}>Vender o arrendar mi propiedad</option>
+        <option selected={presetSubject === 'Proyecto de inversión'}>Proyecto de inversión</option>
+        <option>Otro</option>
+      </select>
+    </div>
+  )}
+  <div>
+    <label class="field-label" for="message">Mensaje</label>
+    <textarea
+      class="field resize-none"
+      id="message"
+      name="message"
+      rows={compact ? 3 : 5}
+      placeholder={presetSubject ? `Hola, me interesa ${presetSubject.toLowerCase()}...` : '¿En qué podemos ayudarte?'}
+    ></textarea>
+  </div>
+  <button type="submit" class="btn-primary w-full">
+    {compact ? 'Solicitar información' : 'Enviar mensaje'}
+  </button>
+</form>

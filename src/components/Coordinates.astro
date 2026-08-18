@@ -1,0 +1,13 @@
+---
+// Eyebrow tag used across the site to introduce a section, echoing the
+// brand's positioning as a trusted local-to-global brokerage.
+interface Props {
+  class?: string;
+  label?: string;
+}
+const { class: className = '', label = 'ML Y JV PROPIEDADES' } = Astro.props;
+---
+<span class={`inline-flex items-center gap-2 font-ui text-[11px] font-semibold tracking-widest2 text-gold-dark ${className}`}>
+  <span class="inline-block h-1.5 w-1.5 rounded-full bg-gold"></span>
+  {label}
+</span>

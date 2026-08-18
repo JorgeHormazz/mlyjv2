@@ -1,0 +1,42 @@
+---
+import { site, telLink, mailLink, whatsappLink } from '../data/site.js';
+---
+<footer class="border-t border-navy-700/40 bg-navy-950 py-16 text-paper">
+  <div class="mx-auto max-w-7xl px-5 md:px-12">
+    <div class="grid grid-cols-1 gap-12 md:grid-cols-4">
+      <div class="md:col-span-2">
+        <div class="flex items-center gap-3">
+          <img src="/logo.png" alt={site.name} class="h-11 w-11 rounded-sm object-contain" />
+          <span class="font-display text-xl font-semibold text-gold-light">{site.name}</span>
+        </div>
+        <p class="mt-4 max-w-sm font-body text-sm leading-relaxed text-paper/70">
+          {site.impactPhrase}
+        </p>
+        <p class="mt-6 font-ui text-[11px] font-semibold uppercase tracking-widest2 text-gold/80">
+          {site.legalTagline}
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-3 font-body text-sm">
+        <h4 class="font-ui text-[11px] font-semibold uppercase tracking-widest2 text-gold-light">Navegación</h4>
+        <a href="/" class="text-paper/70 transition-colors hover:text-gold-light">Inicio</a>
+        <a href="/propiedades" class="text-paper/70 transition-colors hover:text-gold-light">Propiedades</a>
+        <a href="/sobre-mi" class="text-paper/70 transition-colors hover:text-gold-light">Quiénes somos</a>
+        <a href="/contacto" class="text-paper/70 transition-colors hover:text-gold-light">Contacto</a>
+      </div>
+
+      <div class="flex flex-col gap-3 font-body text-sm">
+        <h4 class="font-ui text-[11px] font-semibold uppercase tracking-widest2 text-gold-light">Contacto</h4>
+        <a href={telLink()} class="text-paper/70 transition-colors hover:text-gold-light">{site.phoneDisplay}</a>
+        <a href={whatsappLink()} target="_blank" rel="noopener" class="text-paper/70 transition-colors hover:text-gold-light">WhatsApp comercial</a>
+        <a href={mailLink()} class="text-paper/70 transition-colors hover:text-gold-light break-all">{site.email}</a>
+        <span class="text-paper/70">{site.coverageArea}</span>
+      </div>
+    </div>
+
+    <div class="mt-14 flex flex-col-reverse items-center justify-between gap-4 border-t border-paper/10 pt-6 text-center font-body text-xs text-paper/50 md:flex-row md:text-left">
+      <p>© {new Date().getFullYear()} {site.name}. Todos los derechos reservados.</p>
+      <a href="/terminos" class="text-paper/60 hover:text-gold-light">Términos y condiciones</a>
+    </div>
+  </div>
+</footer>
