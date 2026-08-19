@@ -94,7 +94,8 @@ const submitLabel = compact ? "Solicitar información" : "Enviar mensaje";
       rows={compact ? 3 : 5}
       placeholder={presetSubject
         ? `Hola, me interesa ${presetSubject.toLowerCase()}...`
-        : "¿En qué podemos ayudarte?"}></textarea>
+        : "¿En qué podemos ayudarte?"}
+      required></textarea>
   </div>
 
   <p id="contact-form-error" class="hidden font-body text-sm text-red-600">
