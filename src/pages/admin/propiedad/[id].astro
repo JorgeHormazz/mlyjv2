@@ -4,7 +4,7 @@ const { id } = Astro.params;
 ---
 
 <AdminLayout title="Editar propiedad" active="dashboard">
-  <div class="mx-auto max-w-3xl">
+  <div class="mx-auto max-w-3xl" id="edit-root" data-property-id={id}>
     <a
       href="/admin"
       class="mb-4 inline-flex items-center gap-1 font-ui text-xs text-stone-500 hover:text-navy-800"
@@ -157,8 +157,11 @@ const { id } = Astro.params;
             ><input class="field" id="parking" type="number" min="0" />
           </div>
           <div>
-            <label class="field-label" for="built">Metros construidos</label
-            ><input class="field" id="built" placeholder="Ej: 180 m²" />
+            <label class="field-label" for="built">Construidos</label><input
+              class="field"
+              id="built"
+              placeholder="Ej: 180 m²"
+            />
           </div>
         </div>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -256,87 +259,141 @@ const { id } = Astro.params;
   }
 </style>
 
-<script define:vars={{ propertyId: id }}>
+<script>
   import { supabase } from "../../../lib/supabase.js";
 
-  const guard = document.getElementById("admin-guard");
-  const form = document.getElementById("property-form");
-  const viviendaFields = document.getElementById("vivienda-fields");
-  const viviendaHelp = document.getElementById("vivienda-help");
-  const errorEl = document.getElementById("form-error");
-  const submitBtn = document.getElementById("submit-btn");
-  const deleteBtn = document.getElementById("delete-btn");
+  // Declarar explícitamente las interfaces de la propiedad si es necesario
+  interface Property {
+    title: string;
+    property_type: string;
+    operation: string;
+    tag?: string | null;
+    location: string;
+    commune: string;
+    price: string;
+    price_clp?: string | null;
+    beds?: number | null;
+    baths?: number | null;
+    parking?: number | null;
+    built?: string | null;
+    land?: string | null;
+    year?: string | null;
+    image: string;
+    gallery?: string[];
+    description?: string[];
+    specs?: [string, string][];
+  }
+
+  // Hacer castings explícitos de los elementos del DOM
+  const guard = document.getElementById("admin-guard") as HTMLDivElement;
+  const form = document.getElementById("property-form") as HTMLFormElement;
+  const viviendaFields = document.getElementById(
+    "vivienda-fields",
+  ) as HTMLDivElement;
+  const viviendaHelp = document.getElementById(
+    "vivienda-help",
+  ) as HTMLParagraphElement;
+  const errorEl = document.getElementById("form-error") as HTMLParagraphElement;
+  const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
+  const deleteBtn = document.getElementById("delete-btn") as HTMLButtonElement;
+  const propertyId =
+    document.getElementById("edit-root")?.dataset.propertyId ?? "";
 
   const {
     data: { session },
   } = await supabase.auth.getSession();
-  if (!session) {
-    window.location.href = "/admin/login";
-  } else {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", session.user.id)
-      .single();
-    if (!profile || profile.role !== "admin") {
-      guard.textContent = "Tu cuenta no tiene permisos de administrador.";
+
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) {
+      window.location.href = "/admin/login";
     } else {
-      const { data: property, error } = await supabase
-        .from("properties")
-        .select("*")
-        .eq("id", propertyId)
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", session.user.id)
         .single();
-      if (error || !property) {
-        guard.textContent = "Propiedad no encontrada.";
+
+      if (profileError || !profile || profile.role !== "admin") {
+        guard.textContent = "Tu cuenta no tiene permisos de administrador.";
       } else {
-        guard.classList.add("hidden");
-        form.classList.remove("hidden");
-        form.classList.add("flex");
-        fillForm(property);
+        const { data: property, error } = await supabase
+          .from("properties")
+          .select("*")
+          .eq("id", propertyId)
+          .single();
+        if (error || !property) {
+          guard.textContent = "Propiedad no encontrada.";
+        } else {
+          guard.classList.add("hidden");
+          form.classList.remove("hidden");
+          form.classList.add("flex");
+          fillForm(property);
+        }
       }
     }
+  } catch (err) {
+    guard.textContent =
+      "Ocurrió un error verificando tu sesión. Recarga la página.";
+    console.error(err);
   }
 
-  function setRadioValue(name, value) {
-    const el = document.querySelector(
+  function setRadioValue(name: string, value: string) {
+    const el = document.querySelector<HTMLInputElement>(
       `input[name="${name}"][value="${value}"]`,
     );
     if (el) el.checked = true;
   }
-  function getTypeSelectValue() {
+
+  function getTypeSelectValue(): string {
     return (
-      document.querySelector('input[name="property_type"]:checked')?.value ??
-      "Casa"
-    );
-  }
-  function getOperationValue() {
-    return (
-      document.querySelector('input[name="operation"]:checked')?.value ??
-      "Venta"
+      document.querySelector<HTMLInputElement>(
+        'input[name="property_type"]:checked',
+      )?.value ?? "Casa"
     );
   }
 
-  function fillForm(p) {
-    document.getElementById("title").value = p.title;
+  function getOperationValue(): string {
+    return (
+      document.querySelector<HTMLInputElement>(
+        'input[name="operation"]:checked',
+      )?.value ?? "Venta"
+    );
+  }
+
+  function fillForm(p: Property) {
+    (document.getElementById("title") as HTMLInputElement).value = p.title;
     setRadioValue("property_type", p.property_type);
     setRadioValue("operation", p.operation);
-    document.getElementById("tag").value = p.tag ?? "";
-    document.getElementById("location").value = p.location;
-    document.getElementById("commune").value = p.commune;
-    document.getElementById("price").value = p.price;
-    document.getElementById("price_clp").value = p.price_clp ?? "";
-    document.getElementById("beds").value = p.beds ?? "";
-    document.getElementById("baths").value = p.baths ?? "";
-    document.getElementById("parking").value = p.parking ?? "";
-    document.getElementById("built").value = p.built ?? "";
-    document.getElementById("land").value = p.land ?? "";
-    document.getElementById("year").value = p.year ?? "";
-    document.getElementById("image").value = p.image;
-    document.getElementById("gallery").value = (p.gallery ?? []).join("\n");
-    document.getElementById("description").value = (p.description ?? []).join(
-      "\n",
-    );
-    document.getElementById("specs").value = (p.specs ?? [])
+    (document.getElementById("tag") as HTMLInputElement).value = p.tag ?? "";
+    (document.getElementById("location") as HTMLInputElement).value =
+      p.location;
+    (document.getElementById("commune") as HTMLInputElement).value = p.commune;
+    (document.getElementById("price") as HTMLInputElement).value = p.price;
+    (document.getElementById("price_clp") as HTMLInputElement).value =
+      p.price_clp ?? "";
+    (document.getElementById("beds") as HTMLInputElement).value =
+      p.beds?.toString() ?? "";
+    (document.getElementById("baths") as HTMLInputElement).value =
+      p.baths?.toString() ?? "";
+    (document.getElementById("parking") as HTMLInputElement).value =
+      p.parking?.toString() ?? "";
+    (document.getElementById("built") as HTMLInputElement).value =
+      p.built ?? "";
+    (document.getElementById("land") as HTMLInputElement).value = p.land ?? "";
+    (document.getElementById("year") as HTMLInputElement).value = p.year ?? "";
+    (document.getElementById("image") as HTMLInputElement).value = p.image;
+    (document.getElementById("gallery") as HTMLTextAreaElement).value = (
+      p.gallery ?? []
+    ).join("\n");
+    (document.getElementById("description") as HTMLTextAreaElement).value = (
+      p.description ?? []
+    ).join("\n");
+    (document.getElementById("specs") as HTMLTextAreaElement).value = (
+      p.specs ?? []
+    )
       .map(([l, v]) => `${l}: ${v}`)
       .join("\n");
     toggleViviendaFields();
@@ -344,22 +401,28 @@ const { id } = Astro.params;
 
   function toggleViviendaFields() {
     const isTerreno = getTypeSelectValue() === "Terreno";
-    viviendaFields.style.display = isTerreno ? "none" : "grid";
-    viviendaHelp.textContent = isTerreno
-      ? "Los terrenos no requieren habitaciones ni baños."
-      : "Deja en blanco lo que no aplique.";
+    if (viviendaFields) {
+      viviendaFields.style.display = isTerreno ? "none" : "grid";
+    }
+    if (viviendaHelp) {
+      viviendaHelp.textContent = isTerreno
+        ? "Los terrenos no requieren habitaciones ni baños."
+        : "Deja en blanco lo que no aplique.";
+    }
   }
+
   document
-    .querySelectorAll('input[name="property_type"]')
+    .querySelectorAll<HTMLInputElement>('input[name="property_type"]')
     .forEach((el) => el.addEventListener("change", toggleViviendaFields));
 
-  function linesToArray(value) {
+  function linesToArray(value: string): string[] {
     return value
       .split("\n")
       .map((l) => l.trim())
       .filter(Boolean);
   }
-  function specsToArray(value) {
+
+  function specsToArray(value: string): [string, string][] {
     return linesToArray(value).map((line) => {
       const idx = line.indexOf(":");
       return idx === -1
@@ -367,18 +430,22 @@ const { id } = Astro.params;
         : [line.slice(0, idx).trim(), line.slice(idx + 1).trim()];
     });
   }
-  function toIntOrNull(value) {
+
+  function toIntOrNull(value: string): number | null {
     return value === "" ? null : parseInt(value, 10);
   }
 
-  form?.addEventListener("submit", async (e) => {
+  form?.addEventListener("submit", async (e: SubmitEvent) => {
     e.preventDefault();
-    errorEl.classList.add("hidden");
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Guardando...";
+    errorEl?.classList.add("hidden");
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Guardando...";
+    }
 
     const isTerreno = getTypeSelectValue() === "Terreno";
-    const val = (id) => document.getElementById(id).value.trim();
+    const val = (id: string) =>
+      (document.getElementById(id) as HTMLInputElement)?.value.trim() ?? "";
 
     const payload = {
       title: val("title"),
@@ -396,32 +463,50 @@ const { id } = Astro.params;
       land: val("land") || null,
       year: val("year") || null,
       image: val("image"),
-      gallery: linesToArray(document.getElementById("gallery").value),
-      description: linesToArray(document.getElementById("description").value),
-      specs: specsToArray(document.getElementById("specs").value),
+      gallery: linesToArray(
+        (document.getElementById("gallery") as HTMLTextAreaElement).value,
+      ),
+      description: linesToArray(
+        (document.getElementById("description") as HTMLTextAreaElement).value,
+      ),
+      specs: specsToArray(
+        (document.getElementById("specs") as HTMLTextAreaElement).value,
+      ),
     };
 
     const { error } = await supabase
       .from("properties")
       .update(payload)
       .eq("id", propertyId);
+
     if (error) {
-      errorEl.textContent = "No se pudo guardar: " + error.message;
-      errorEl.classList.remove("hidden");
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Guardar cambios";
+      if (errorEl) {
+        errorEl.textContent = "No se pudo guardar: " + error.message;
+        errorEl.classList.remove("hidden");
+      }
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Guardar cambios";
+      }
       return;
     }
     window.location.href = "/admin";
   });
 
   deleteBtn?.addEventListener("click", async () => {
-    if (!confirm("¿Eliminar esta propiedad? Esta acción no se puede deshacer."))
-      return;
+    const ok =
+      (await window.confirmModal?.(
+        "¿Eliminar esta propiedad? Esta acción no se puede deshacer.",
+      )) ??
+      window.confirm(
+        "¿Eliminar esta propiedad? Esta acción no se puede deshacer.",
+      );
+    if (!ok) return;
     const { error } = await supabase
       .from("properties")
       .delete()
       .eq("id", propertyId);
+
     if (error) {
       alert("No se pudo eliminar: " + error.message);
       return;

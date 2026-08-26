@@ -1,9 +1,10 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import PropertyCard from "../../components/PropertyCard.astro";
-import { getAllProperties, communes, types } from "../../lib/properties.js";
+import { getAllProperties, getFiltersFrom } from "../../lib/properties.js";
 
 const properties = await getAllProperties();
+const { communes, types } = getFiltersFrom(properties);
 ---
 
 <Layout

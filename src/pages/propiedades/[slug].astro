@@ -7,9 +7,10 @@ import {
   telLink,
   whatsappLink,
   propertyWhatsappMessage,
+  mailLink,
 } from "../../data/site.js";
 
-export const prerender = false; // se resuelve en cada request contra Supabase
+export const prerender = false;
 
 const { slug } = Astro.params;
 const property = await getPropertyBySlug(slug);
@@ -38,13 +39,13 @@ const stats: [string, string | number][] = [
   description={property.description?.[0] ?? property.title}
 >
   <nav
-    class="mx-auto max-w-7xl px-5 pt-6 font-body text-xs text-stone-500 md:px-12"
+    class="mx-auto max-w-7xl px-5 pt-8 font-ui text-[11px] uppercase tracking-wide text-stone-400 md:px-12"
   >
     <a href="/" class="hover:text-navy-800">Inicio</a>
     <span class="mx-2">/</span>
     <a href="/propiedades" class="hover:text-navy-800">Propiedades</a>
     <span class="mx-2">/</span>
-    <span class="text-navy-800">{property.title}</span>
+    <span class="text-navy-900">{property.title}</span>
   </nav>
 
   <section class="mx-auto max-w-7xl px-5 py-6 md:px-12">
@@ -62,6 +63,10 @@ const stats: [string, string | number][] = [
           alt={property.title}
           class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
         />
+        <div
+          class="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950/50 via-transparent to-transparent"
+        >
+        </div>
         <span
           class="absolute left-4 top-4 rounded-sm bg-gold px-3 py-1 font-ui text-[11px] font-bold uppercase tracking-wider text-navy-950 shadow-sm"
         >
@@ -162,18 +167,20 @@ const stats: [string, string | number][] = [
   >
     <div class="flex flex-col gap-10 md:col-span-2">
       <div class="border-b border-stone-200 pb-8">
-        <p class="eyebrow mb-3">
-          {property.property_type} · {property.commune}
-        </p>
+        <div class="mb-3 flex flex-wrap items-center gap-2">
+          <span class="eyebrow"
+            >{property.property_type} · {property.commune}</span
+          >
+        </div>
         <h1
-          class="font-display text-3xl font-semibold text-navy-900 md:text-4xl"
+          class="font-display text-3xl font-semibold leading-tight text-navy-900 md:text-4xl"
         >
           {property.title}
         </h1>
-        <p class="mt-2 flex items-center gap-1 font-body text-stone-600">
+        <p class="mt-3 flex items-center gap-1.5 font-body text-stone-600">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4"
+            class="h-4 w-4 text-gold-dark"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -189,25 +196,36 @@ const stats: [string, string | number][] = [
           >
           {property.location}
         </p>
-        <p class="mt-4 font-display text-3xl font-semibold text-gold-dark">
-          {property.price}
-        </p>
+        <div class="mt-6 flex flex-wrap items-end gap-3">
+          <p
+            class="font-ui text-4xl font-extrabold tracking-tight text-gold-dark md:text-[42px]"
+          >
+            {property.price}
+          </p>
+          <span
+            class="rounded-full bg-navy-950 px-3 py-1 font-ui text-[10px] font-bold uppercase tracking-wider text-paper"
+          >
+            {property.operation}
+          </span>
+        </div>
         {
           property.price_clp && (
-            <p class="font-body text-sm text-stone-500">{property.price_clp}</p>
+            <p class="mt-1 font-body text-sm text-stone-500">
+              {property.price_clp}
+            </p>
           )
         }
       </div>
 
       {
         stats.length > 0 && (
-          <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
             {stats.map(([label, value]: [string, string | number]) => (
-              <div class="flex flex-col items-center gap-1 rounded-sm bg-stone-50 py-5 text-center">
-                <span class="font-display text-xl font-semibold text-navy-900">
+              <div class="flex flex-col items-center gap-2 rounded-md border border-stone-200 border-t-[3px] border-t-gold bg-stone-50 px-3 py-6 text-center transition-colors hover:bg-white hover:shadow-card">
+                <span class="font-ui text-2xl font-extrabold leading-none tracking-tight text-navy-900 sm:text-[26px]">
                   {value}
                 </span>
-                <span class="font-ui text-[10px] font-semibold uppercase tracking-widest2 text-stone-500">
+                <span class="font-ui text-[10px] font-semibold uppercase leading-none tracking-widest2 text-stone-500">
                   {label}
                 </span>
               </div>
@@ -222,7 +240,7 @@ const stats: [string, string | number][] = [
             <h2 class="mb-4 font-display text-2xl font-semibold text-navy-900">
               Descripción
             </h2>
-            <div class="flex flex-col gap-4 font-body leading-relaxed text-stone-700">
+            <div class="flex flex-col gap-5 font-body text-[15px] leading-relaxed text-stone-700">
               {property.description.map((p: string) => (
                 <p>{p}</p>
               ))}
@@ -252,25 +270,29 @@ const stats: [string, string | number][] = [
 
     <aside class="md:col-span-1">
       <div
-        class="sticky top-24 flex flex-col gap-6 rounded-sm border border-stone-200 bg-white p-6 shadow-cardLg"
+        class="sticky top-24 flex flex-col gap-6 overflow-hidden rounded-md border border-stone-200 bg-white shadow-cardLg"
       >
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 bg-navy-950 px-6 py-5">
           <img
             src="/logo.png"
             alt={site.name}
-            class="h-14 w-14 rounded-sm object-contain"
+            class="h-12 w-12 rounded-sm object-contain"
           />
           <div>
-            <p class="font-display text-lg font-semibold text-navy-900">
+            <p class="font-display text-base font-semibold text-paper">
               {site.shortName}
             </p>
-            <p class="font-body text-sm text-stone-500">
+            <p
+              class="font-ui text-[11px] uppercase tracking-widest2 text-gold-light"
+            >
               Asesoría personalizada
             </p>
           </div>
         </div>
-        <div class="flex flex-col gap-3">
+
+        <div class="flex flex-col gap-3 px-6">
           <a href={telLink()} class="btn-primary w-full">Llamar ahora</a>
+
           <a
             href={whatsappLink(
               undefined,
@@ -283,30 +305,43 @@ const stats: [string, string | number][] = [
             Contactar por WhatsApp
           </a>
         </div>
-        <div class="border-t border-stone-100 pt-5">
+
+        <div class="border-t border-stone-100 px-6 pb-6 pt-5">
           <p class="field-label !mb-3">Solicitar información</p>
-          <form class="flex flex-col gap-3" method="POST" action="#">
-            <input class="field" type="text" placeholder="Tu nombre" required />
-            <input
-              class="field"
-              type="email"
-              placeholder="Tu correo o teléfono"
-              required
-            />
-            <textarea
-              class="field resize-none"
-              rows="3"
-              placeholder={`Hola, me interesa ${property.title.toLowerCase()}...`}
-            ></textarea>
-            <button type="submit" class="btn-primary w-full"
-              >Enviar consulta</button
+
+          <a
+            href={mailLink(`Consulta por ${property.title}`)}
+            class="group flex items-center gap-3 rounded-sm border border-stone-200 px-4
+        py-3.5 font-body text-sm text-navy-900 transition-colors hover:border-gold
+        hover:bg-gold/5"
+          >
+            <span
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-navy-800/5 text-navy-800 transition-colors group-hover:bg-gold group-hover:text-navy-950"
             >
-          </form>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="1.75"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.01 1.877l-7.5 5.006a2.25 2.25 0 01-2.48 0L3.26 8.87a2.25 2.25 0 01-1.01-1.877V6.75"
+                ></path>
+              </svg>
+            </span>
+            <span class="flex flex-col">
+              <span class="font-medium">Escríbenos por correo</span>
+              <span class="text-xs text-stone-500 break-all">{site.email}</span>
+            </span>
+          </a>
         </div>
       </div>
     </aside>
   </section>
-
   <section class="border-t border-stone-200 bg-stone-50 py-20">
     <div class="mx-auto max-w-7xl px-5 md:px-12">
       <h2
@@ -319,52 +354,54 @@ const stats: [string, string | number][] = [
       </div>
     </div>
   </section>
+
+  <script
+    define:vars={{ images: [property.image, ...(property.gallery ?? [])] }}
+  >
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImage = document.getElementById("lightbox-image");
+    const lightboxCount = document.getElementById("lightbox-count");
+    const closeBtn = document.getElementById("lightbox-close");
+    const prevBtn = document.getElementById("lightbox-prev");
+    const nextBtn = document.getElementById("lightbox-next");
+    let current = 0;
+
+    function render() {
+      lightboxImage.src = images[current];
+      lightboxCount.textContent = `${current + 1} / ${images.length}`;
+    }
+    function open(index) {
+      current = index;
+      render();
+      lightbox.classList.remove("hidden");
+      lightbox.classList.add("flex");
+      document.body.style.overflow = "hidden";
+    }
+    function close() {
+      lightbox.classList.add("hidden");
+      lightbox.classList.remove("flex");
+      document.body.style.overflow = "";
+    }
+    document.querySelectorAll(".lightbox-trigger").forEach((el) => {
+      el.addEventListener("click", () => open(Number(el.dataset.index)));
+    });
+    closeBtn?.addEventListener("click", close);
+    lightbox?.addEventListener("click", (e) => {
+      if (e.target === lightbox) close();
+    });
+    prevBtn?.addEventListener("click", () => {
+      current = (current - 1 + images.length) % images.length;
+      render();
+    });
+    nextBtn?.addEventListener("click", () => {
+      current = (current + 1) % images.length;
+      render();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (lightbox.classList.contains("hidden")) return;
+      if (e.key === "Escape") close();
+      if (e.key === "ArrowLeft") prevBtn?.click();
+      if (e.key === "ArrowRight") nextBtn?.click();
+    });
+  </script>
 </Layout>
-
-<script define:vars={{ images: [property.image, ...(property.gallery ?? [])] }}>
-  const lightbox = document.getElementById("lightbox");
-  const lightboxImage = document.getElementById("lightbox-image");
-  const lightboxCount = document.getElementById("lightbox-count");
-  const closeBtn = document.getElementById("lightbox-close");
-  const prevBtn = document.getElementById("lightbox-prev");
-  const nextBtn = document.getElementById("lightbox-next");
-  let current = 0;
-
-  function render() {
-    lightboxImage.src = images[current];
-    lightboxCount.textContent = `${current + 1} / ${images.length}`;
-  }
-  function open(index) {
-    current = index;
-    render();
-    lightbox.classList.remove("hidden");
-    lightbox.classList.add("flex");
-    document.body.style.overflow = "hidden";
-  }
-  function close() {
-    lightbox.classList.add("hidden");
-    lightbox.classList.remove("flex");
-    document.body.style.overflow = "";
-  }
-  document.querySelectorAll(".lightbox-trigger").forEach((el) => {
-    el.addEventListener("click", () => open(Number(el.dataset.index)));
-  });
-  closeBtn?.addEventListener("click", close);
-  lightbox?.addEventListener("click", (e) => {
-    if (e.target === lightbox) close();
-  });
-  prevBtn?.addEventListener("click", () => {
-    current = (current - 1 + images.length) % images.length;
-    render();
-  });
-  nextBtn?.addEventListener("click", () => {
-    current = (current + 1) % images.length;
-    render();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (lightbox.classList.contains("hidden")) return;
-    if (e.key === "Escape") close();
-    if (e.key === "ArrowLeft") prevBtn?.click();
-    if (e.key === "ArrowRight") nextBtn?.click();
-  });
-</script>

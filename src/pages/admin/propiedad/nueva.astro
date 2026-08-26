@@ -87,22 +87,6 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
               required
               placeholder="Ej: Casa amplia con jardín, Sector Norte"
             />
-            <p class="mt-2 font-ui text-xs text-stone-400">
-              Se verá en: mlyjvcorretajes.cl/propiedades/<span
-                id="slug-preview"
-                class="font-medium text-stone-500">tu-titulo-aqui</span
-              >
-              <button
-                type="button"
-                id="edit-slug-btn"
-                class="ml-2 text-navy-800 underline">editar</button
-              >
-            </p>
-            <input
-              class="field mt-2 hidden"
-              id="slug"
-              placeholder="url-de-la-propiedad"
-            />
           </div>
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
@@ -121,14 +105,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
                 id="commune"
                 required
                 placeholder="Ej: Chillán"
-                list="commune-list"
               />
-              <datalist id="commune-list">
-                <option value="Chillán"></option>
-                <option value="Chillán Viejo"></option>
-                <option value="San Carlos"></option>
-                <option value="Bulnes"></option>
-              </datalist>
             </div>
           </div>
         </div>
@@ -190,7 +167,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
             <input class="field" id="parking" type="number" min="0" />
           </div>
           <div>
-            <label class="field-label" for="built">Metros construidos</label>
+            <label class="field-label" for="built">Construidos</label>
             <input class="field" id="built" placeholder="Ej: 180 m²" />
           </div>
         </div>
@@ -323,11 +300,6 @@ https://..."></textarea>
   const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
 
   const titleInput = document.getElementById("title") as HTMLInputElement;
-  const slugInput = document.getElementById("slug") as HTMLInputElement;
-  const slugPreview = document.getElementById("slug-preview") as HTMLElement;
-  const editSlugBtn = document.getElementById(
-    "edit-slug-btn",
-  ) as HTMLButtonElement;
 
   const {
     data: { session },
@@ -359,23 +331,6 @@ https://..."></textarea>
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
   }
-
-  let slugEditedManually = false;
-  titleInput?.addEventListener("input", () => {
-    if (!slugEditedManually) {
-      const s = slugify(titleInput.value) || "tu-titulo-aqui";
-      slugInput.value = s;
-      slugPreview.textContent = s;
-    }
-  });
-  editSlugBtn?.addEventListener("click", () => {
-    slugEditedManually = true;
-    slugInput.classList.remove("hidden");
-    slugInput.focus();
-  });
-  slugInput?.addEventListener("input", () => {
-    slugPreview.textContent = slugInput.value || "tu-titulo-aqui";
-  });
 
   function getTypeSelectValue(): string {
     return (
@@ -438,7 +393,8 @@ https://..."></textarea>
 
     const isTerreno = getTypeSelectValue() === "Terreno";
     const val = (id: string) => getInput(id).value.trim();
-    const finalSlug = slugInput.value.trim() || slugify(titleInput.value);
+    const baseSlug = slugify(titleInput.value) || "propiedad";
+    const finalSlug = `${baseSlug}-${Date.now().toString(36).slice(-4)}`;
 
     const payload = {
       slug: finalSlug,

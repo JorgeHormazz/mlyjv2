@@ -139,12 +139,19 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
 
     document.querySelectorAll(".delete-btn").forEach((btn) => {
       btn.addEventListener("click", async () => {
-        if (
-          !confirm(
-            "¿Eliminar esta propiedad? Esta acción no se puede deshacer.",
-          )
-        )
-          return;
+        const confirmModal = (
+          window as Window & {
+            confirmModal?: (message: string) => Promise<boolean>;
+          }
+        ).confirmModal;
+        const ok = confirmModal
+          ? await confirmModal(
+              "¿Eliminar esta propiedad? Esta acción no se puede deshacer.",
+            )
+          : window.confirm(
+              "¿Eliminar esta propiedad? Esta acción no se puede deshacer.",
+            );
+        if (!ok) return;
         const id = btn.getAttribute("data-id");
         const { error: delError } = await supabase
           .from("properties")
