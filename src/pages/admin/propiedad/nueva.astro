@@ -1,164 +1,314 @@
 ---
-import Layout from "../../../layouts/Layout.astro";
+import AdminLayout from "../../../layouts/AdminLayout.astro";
 ---
 
-<Layout title="Nueva propiedad" description="Panel administrador">
-  <section class="mx-auto max-w-3xl px-5 py-10 md:px-12">
-    <p class="eyebrow mb-2">Panel administrador</p>
-    <h1 class="mb-8 font-display text-3xl font-semibold text-navy-900">
-      Nueva propiedad
+<AdminLayout title="Nueva propiedad" active="nueva">
+  <div class="mx-auto max-w-3xl">
+    <a
+      href="/admin"
+      class="mb-4 inline-flex items-center gap-1 font-ui text-xs text-stone-500 hover:text-navy-800"
+    >
+      ← Volver a mis propiedades
+    </a>
+    <p class="eyebrow mb-2">Nueva publicación</p>
+    <h1 class="mb-1 font-display text-3xl font-semibold text-navy-900">
+      Agregar propiedad
     </h1>
+    <p class="mb-8 font-body text-sm text-stone-500">
+      Completa los datos paso a paso. Puedes dejar en blanco lo que no aplique a
+      tu propiedad.
+    </p>
 
-    <div id="admin-guard" class="font-body text-sm text-stone-500">
+    <div
+      id="admin-guard"
+      class="rounded-sm border border-stone-200 bg-white p-8 text-center font-body text-sm text-stone-500"
+    >
       Verificando sesión...
     </div>
 
-    <form id="property-form" class="hidden flex-col gap-5">
-      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <div>
-          <label class="field-label" for="slug">Slug (URL)</label>
-          <input
-            class="field"
-            id="slug"
-            required
-            placeholder="casa-sector-norte-chillan"
-          />
+    <form id="property-form" class="hidden flex-col gap-8">
+      <!-- PASO 1 -->
+      <section class="rounded-sm border border-stone-200 bg-white p-6">
+        <h2 class="mb-4 font-display text-lg font-semibold text-navy-900">
+          1. ¿Qué estás publicando?
+        </h2>
+        <div class="mb-5">
+          <p class="field-label !mb-3">Tipo de propiedad</p>
+          <div class="flex flex-wrap gap-2" id="property_type_group">
+            <label class="type-option">
+              <input type="radio" name="property_type" value="Casa" checked />
+              <span>Casa</span>
+            </label>
+            <label class="type-option">
+              <input type="radio" name="property_type" value="Departamento" />
+              <span>Departamento</span>
+            </label>
+            <label class="type-option">
+              <input type="radio" name="property_type" value="Condominio" />
+              <span>Condominio</span>
+            </label>
+            <label class="type-option">
+              <input type="radio" name="property_type" value="Terreno" />
+              <span>Terreno</span>
+            </label>
+          </div>
         </div>
         <div>
-          <label class="field-label" for="title">Título</label>
-          <input class="field" id="title" required />
+          <p class="field-label !mb-3">¿Es para vender o arrendar?</p>
+          <div class="flex flex-wrap gap-2">
+            <label class="type-option">
+              <input type="radio" name="operation" value="Venta" checked />
+              <span>Venta</span>
+            </label>
+            <label class="type-option">
+              <input type="radio" name="operation" value="Arriendo" />
+              <span>Arriendo</span>
+            </label>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
-        <div>
-          <label class="field-label" for="property_type"
-            >Tipo de propiedad</label
-          >
-          <select class="field" id="property_type" required>
-            <option value="Casa">Casa</option>
-            <option value="Departamento">Departamento</option>
-            <option value="Condominio">Condominio</option>
-            <option value="Terreno">Terreno</option>
-          </select>
+      <!-- PASO 2 -->
+      <section class="rounded-sm border border-stone-200 bg-white p-6">
+        <h2 class="mb-1 font-display text-lg font-semibold text-navy-900">
+          2. Título y ubicación
+        </h2>
+        <p class="mb-4 font-body text-sm text-stone-500">
+          El título es lo primero que verán los interesados.
+        </p>
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="field-label" for="title"
+              >Título de la publicación</label
+            >
+            <input
+              class="field"
+              id="title"
+              required
+              placeholder="Ej: Casa amplia con jardín, Sector Norte"
+            />
+            <p class="mt-2 font-ui text-xs text-stone-400">
+              Se verá en: mlyjvcorretajes.cl/propiedades/<span
+                id="slug-preview"
+                class="font-medium text-stone-500">tu-titulo-aqui</span
+              >
+              <button
+                type="button"
+                id="edit-slug-btn"
+                class="ml-2 text-navy-800 underline">editar</button
+              >
+            </p>
+            <input
+              class="field mt-2 hidden"
+              id="slug"
+              placeholder="url-de-la-propiedad"
+            />
+          </div>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label class="field-label" for="location">Sector o barrio</label>
+              <input
+                class="field"
+                id="location"
+                required
+                placeholder="Ej: Sector Norte"
+              />
+            </div>
+            <div>
+              <label class="field-label" for="commune">Comuna</label>
+              <input
+                class="field"
+                id="commune"
+                required
+                placeholder="Ej: Chillán"
+                list="commune-list"
+              />
+              <datalist id="commune-list">
+                <option value="Chillán"></option>
+                <option value="Chillán Viejo"></option>
+                <option value="San Carlos"></option>
+                <option value="Bulnes"></option>
+              </datalist>
+            </div>
+          </div>
         </div>
-        <div>
-          <label class="field-label" for="operation">Operación</label>
-          <select class="field" id="operation">
-            <option value="Venta">Venta</option>
-            <option value="Arriendo">Arriendo</option>
-          </select>
-        </div>
-        <div>
-          <label class="field-label" for="tag">Etiqueta (opcional)</label>
-          <input
-            class="field"
-            id="tag"
-            placeholder="Destacada, Nuevo, Inversión..."
-          />
-        </div>
-      </div>
+      </section>
 
-      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <div>
-          <label class="field-label" for="location">Ubicación</label>
-          <input
-            class="field"
-            id="location"
-            required
-            placeholder="Sector Norte, Chillán"
-          />
+      <!-- PASO 3 -->
+      <section class="rounded-sm border border-stone-200 bg-white p-6">
+        <h2 class="mb-1 font-display text-lg font-semibold text-navy-900">
+          3. Precio
+        </h2>
+        <p class="mb-4 font-body text-sm text-stone-500">
+          Puedes indicar el precio en UF, pesos o como prefieras.
+        </p>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label class="field-label" for="price">Precio a mostrar</label>
+            <input
+              class="field"
+              id="price"
+              required
+              placeholder="Ej: UF 6.200"
+            />
+          </div>
+          <div>
+            <label class="field-label" for="price_clp"
+              >Precio referencial en pesos (opcional)</label
+            >
+            <input
+              class="field"
+              id="price_clp"
+              placeholder="Ej: Aprox. $230.000.000 CLP"
+            />
+          </div>
         </div>
-        <div>
-          <label class="field-label" for="commune">Comuna</label>
-          <input class="field" id="commune" required placeholder="Chillán" />
-        </div>
-      </div>
+      </section>
 
-      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <div>
-          <label class="field-label" for="price">Precio (UF/CLP)</label>
-          <input class="field" id="price" required placeholder="UF 6.200" />
-        </div>
-        <div>
-          <label class="field-label" for="price_clp"
-            >Precio referencial CLP (opcional)</label
-          >
-          <input
-            class="field"
-            id="price_clp"
-            placeholder="Aprox. $230.000.000 CLP"
-          />
-        </div>
-      </div>
-
-      <!-- Campos exclusivos de casa/departamento/condominio -->
-      <div id="vivienda-fields" class="grid grid-cols-2 gap-5 sm:grid-cols-4">
-        <div>
-          <label class="field-label" for="beds">Habitaciones</label>
-          <input class="field" id="beds" type="number" min="0" />
-        </div>
-        <div>
-          <label class="field-label" for="baths">Baños</label>
-          <input class="field" id="baths" type="number" min="0" />
-        </div>
-        <div>
-          <label class="field-label" for="parking">Estacionamientos</label>
-          <input class="field" id="parking" type="number" min="0" />
-        </div>
-        <div>
-          <label class="field-label" for="built">Construidos (m²)</label>
-          <input class="field" id="built" placeholder="180 m²" />
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <div>
-          <label class="field-label" for="land">Terreno (m²)</label>
-          <input class="field" id="land" placeholder="450 m²" />
-        </div>
-        <div>
-          <label class="field-label" for="year"
-            >Año de construcción (opcional)</label
-          >
-          <input class="field" id="year" placeholder="2018" />
-        </div>
-      </div>
-
-      <div>
-        <label class="field-label" for="image">Imagen principal (URL)</label>
-        <input class="field" id="image" type="url" required />
-      </div>
-      <div>
-        <label class="field-label" for="gallery"
-          >Galería (una URL por línea)</label
+      <!-- PASO 4 -->
+      <section class="rounded-sm border border-stone-200 bg-white p-6">
+        <h2 class="mb-1 font-display text-lg font-semibold text-navy-900">
+          4. Detalles
+        </h2>
+        <p id="vivienda-help" class="mb-4 font-body text-sm text-stone-500">
+          Deja en blanco lo que no aplique.
+        </p>
+        <div
+          id="vivienda-fields"
+          class="mb-4 grid grid-cols-2 gap-4 sm:grid-cols-4"
         >
-        <textarea class="field resize-none" id="gallery" rows="3"></textarea>
-      </div>
-      <div>
-        <label class="field-label" for="description"
-          >Descripción (un párrafo por línea)</label
-        >
-        <textarea class="field resize-none" id="description" rows="4"
-        ></textarea>
-      </div>
-      <div>
-        <label class="field-label" for="specs"
-          >Características técnicas (una por línea: "Etiqueta: Valor")</label
-        >
-        <textarea
-          class="field resize-none"
-          id="specs"
-          rows="4"
-          placeholder="Orientación: Norponiente"></textarea>
-      </div>
+          <div>
+            <label class="field-label" for="beds">Habitaciones</label>
+            <input class="field" id="beds" type="number" min="0" />
+          </div>
+          <div>
+            <label class="field-label" for="baths">Baños</label>
+            <input class="field" id="baths" type="number" min="0" />
+          </div>
+          <div>
+            <label class="field-label" for="parking">Estacionamientos</label>
+            <input class="field" id="parking" type="number" min="0" />
+          </div>
+          <div>
+            <label class="field-label" for="built">Metros construidos</label>
+            <input class="field" id="built" placeholder="Ej: 180 m²" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label class="field-label" for="land">Metros de terreno</label>
+            <input class="field" id="land" placeholder="Ej: 450 m²" />
+          </div>
+          <div>
+            <label class="field-label" for="year"
+              >Año de construcción (opcional)</label
+            >
+            <input class="field" id="year" placeholder="Ej: 2018" />
+          </div>
+        </div>
+      </section>
 
-      <p id="form-error" class="hidden font-body text-sm text-red-600"></p>
-      <button type="submit" class="btn-primary w-full">Guardar propiedad</button
+      <!-- PASO 5 -->
+      <section class="rounded-sm border border-stone-200 bg-white p-6">
+        <h2 class="mb-1 font-display text-lg font-semibold text-navy-900">
+          5. Fotos
+        </h2>
+        <p class="mb-4 font-body text-sm text-stone-500">
+          Pega el enlace (link) de cada foto. Puedes subir tus fotos a Google
+          Drive, Imgur u otro servicio y copiar el link aquí.
+        </p>
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="field-label" for="image">Foto principal (link)</label>
+            <input
+              class="field"
+              id="image"
+              type="url"
+              required
+              placeholder="https://..."
+            />
+          </div>
+          <div>
+            <label class="field-label" for="gallery"
+              >Fotos adicionales (un link por línea)</label
+            >
+            <textarea
+              class="field resize-none"
+              id="gallery"
+              rows="3"
+              placeholder="https://...
+https://..."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- PASO 6 -->
+      <section class="rounded-sm border border-stone-200 bg-white p-6">
+        <h2 class="mb-1 font-display text-lg font-semibold text-navy-900">
+          6. Descripción
+        </h2>
+        <p class="mb-4 font-body text-sm text-stone-500">
+          Cuenta lo más destacado de la propiedad, en tus palabras.
+        </p>
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="field-label" for="tag"
+              >Destacar con una etiqueta (opcional)</label
+            >
+            <input
+              class="field"
+              id="tag"
+              placeholder="Ej: Destacada, Nuevo, Inversión"
+            />
+          </div>
+          <div>
+            <label class="field-label" for="description"
+              >Descripción (un párrafo por línea)</label
+            >
+            <textarea
+              class="field resize-none"
+              id="description"
+              rows="4"
+              placeholder="Escribe cada párrafo en una línea distinta"
+            ></textarea>
+          </div>
+          <div>
+            <label class="field-label" for="specs"
+              >Características técnicas (opcional)</label
+            >
+            <textarea
+              class="field resize-none"
+              id="specs"
+              rows="3"
+              placeholder='Una por línea, con formato "Etiqueta: Valor". Ej: Orientación: Norponiente'
+            ></textarea>
+          </div>
+        </div>
+      </section>
+
+      <p
+        id="form-error"
+        class="hidden rounded-sm bg-red-50 px-4 py-3 font-body text-sm text-red-600"
+      >
+      </p>
+      <button type="submit" id="submit-btn" class="btn-primary w-full"
+        >Guardar y publicar</button
       >
     </form>
-  </section>
-</Layout>
+  </div>
+</AdminLayout>
+
+<style>
+  .type-option {
+    @apply cursor-pointer rounded-sm border border-stone-200 px-4 py-2 font-ui text-sm font-medium text-stone-600 transition-colors;
+  }
+  .type-option input {
+    @apply sr-only;
+  }
+  .type-option:has(input:checked) {
+    @apply border-navy-800 bg-navy-800 text-paper;
+  }
+</style>
 
 <script>
   import { supabase } from "../../../lib/supabase.js";
@@ -168,10 +318,16 @@ import Layout from "../../../layouts/Layout.astro";
   const viviendaFields = document.getElementById(
     "vivienda-fields",
   ) as HTMLElement;
-  const typeSelect = document.getElementById(
-    "property_type",
-  ) as HTMLSelectElement;
+  const viviendaHelp = document.getElementById("vivienda-help") as HTMLElement;
   const errorEl = document.getElementById("form-error") as HTMLElement;
+  const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
+
+  const titleInput = document.getElementById("title") as HTMLInputElement;
+  const slugInput = document.getElementById("slug") as HTMLInputElement;
+  const slugPreview = document.getElementById("slug-preview") as HTMLElement;
+  const editSlugBtn = document.getElementById(
+    "edit-slug-btn",
+  ) as HTMLButtonElement;
 
   const {
     data: { session },
@@ -193,11 +349,63 @@ import Layout from "../../../layouts/Layout.astro";
     }
   }
 
-  function toggleViviendaFields() {
-    viviendaFields.style.display =
-      typeSelect.value === "Terreno" ? "none" : "grid";
+  function slugify(value: string): string {
+    return value
+      .toString()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
   }
-  typeSelect?.addEventListener("change", toggleViviendaFields);
+
+  let slugEditedManually = false;
+  titleInput?.addEventListener("input", () => {
+    if (!slugEditedManually) {
+      const s = slugify(titleInput.value) || "tu-titulo-aqui";
+      slugInput.value = s;
+      slugPreview.textContent = s;
+    }
+  });
+  editSlugBtn?.addEventListener("click", () => {
+    slugEditedManually = true;
+    slugInput.classList.remove("hidden");
+    slugInput.focus();
+  });
+  slugInput?.addEventListener("input", () => {
+    slugPreview.textContent = slugInput.value || "tu-titulo-aqui";
+  });
+
+  function getTypeSelectValue(): string {
+    return (
+      (
+        document.querySelector(
+          'input[name="property_type"]:checked',
+        ) as HTMLInputElement
+      )?.value ?? "Casa"
+    );
+  }
+  function getOperationValue(): string {
+    return (
+      (
+        document.querySelector(
+          'input[name="operation"]:checked',
+        ) as HTMLInputElement
+      )?.value ?? "Venta"
+    );
+  }
+
+  function toggleViviendaFields() {
+    const isTerreno = getTypeSelectValue() === "Terreno";
+    viviendaFields.style.display = isTerreno ? "none" : "grid";
+    viviendaHelp.textContent = isTerreno
+      ? "Los terrenos no requieren habitaciones ni baños."
+      : "Deja en blanco lo que no aplique.";
+  }
+  document
+    .querySelectorAll('input[name="property_type"]')
+    .forEach((el) => el.addEventListener("change", toggleViviendaFields));
   toggleViviendaFields();
 
   function linesToArray(value: string): string[] {
@@ -206,7 +414,6 @@ import Layout from "../../../layouts/Layout.astro";
       .map((l) => l.trim())
       .filter(Boolean);
   }
-
   function specsToArray(value: string): [string, string][] {
     return linesToArray(value).map((line): [string, string] => {
       const idx = line.indexOf(":");
@@ -215,11 +422,9 @@ import Layout from "../../../layouts/Layout.astro";
         : [line.slice(0, idx).trim(), line.slice(idx + 1).trim()];
     });
   }
-
   function toIntOrNull(value: string): number | null {
     return value === "" ? null : parseInt(value, 10);
   }
-
   function getInput(id: string): HTMLInputElement | HTMLTextAreaElement {
     return document.getElementById(id) as
       HTMLInputElement | HTMLTextAreaElement;
@@ -228,14 +433,18 @@ import Layout from "../../../layouts/Layout.astro";
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     errorEl.classList.add("hidden");
-    const isTerreno = typeSelect.value === "Terreno";
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Guardando...";
+
+    const isTerreno = getTypeSelectValue() === "Terreno";
     const val = (id: string) => getInput(id).value.trim();
+    const finalSlug = slugInput.value.trim() || slugify(titleInput.value);
 
     const payload = {
-      slug: val("slug"),
+      slug: finalSlug,
       title: val("title"),
-      property_type: typeSelect.value,
-      operation: val("operation"),
+      property_type: getTypeSelectValue(),
+      operation: getOperationValue(),
       tag: val("tag") || null,
       location: val("location"),
       commune: val("commune"),
@@ -255,8 +464,10 @@ import Layout from "../../../layouts/Layout.astro";
 
     const { error } = await supabase.from("properties").insert(payload);
     if (error) {
-      errorEl.textContent = "Error al guardar: " + error.message;
+      errorEl.textContent = "No se pudo guardar: " + error.message;
       errorEl.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Guardar y publicar";
       return;
     }
     window.location.href = "/admin";

@@ -1,29 +1,260 @@
 ---
-import Layout from "../../../layouts/Layout.astro";
+import AdminLayout from "../../../layouts/AdminLayout.astro";
 const { id } = Astro.params;
 ---
 
-<Layout title="Editar propiedad" description="Panel administrador">
-  <section class="mx-auto max-w-3xl px-5 py-10 md:px-12">
-    <p class="eyebrow mb-2">Panel administrador</p>
+<AdminLayout title="Editar propiedad" active="dashboard">
+  <div class="mx-auto max-w-3xl">
+    <a
+      href="/admin"
+      class="mb-4 inline-flex items-center gap-1 font-ui text-xs text-stone-500 hover:text-navy-800"
+    >
+      ← Volver a mis propiedades
+    </a>
+    <p class="eyebrow mb-2">Editar publicación</p>
     <h1 class="mb-8 font-display text-3xl font-semibold text-navy-900">
       Editar propiedad
     </h1>
 
-    <div id="admin-guard" class="font-body text-sm text-stone-500">
+    <div
+      id="admin-guard"
+      class="rounded-sm border border-stone-200 bg-white p-8 text-center font-body text-sm text-stone-500"
+    >
       Verificando sesión...
     </div>
 
-    <form id="property-form" class="hidden flex-col gap-5">
-      <!-- Mismos campos que el formulario de "nueva.astro" (slug, title, property_type,
-           operation, tag, location, commune, price, price_clp, vivienda-fields con
-           beds/baths/parking/built, land, year, image, gallery, description, specs) -->
-      <!-- ...copiar exactamente el bloque de <div>/<input>/<select>/<textarea> de arriba... -->
-      <p id="form-error" class="hidden font-body text-sm text-red-600"></p>
-      <button type="submit" class="btn-primary w-full">Guardar cambios</button>
+    <form id="property-form" class="hidden flex-col gap-8">
+      <section class="rounded-sm border border-stone-200 bg-white p-6">
+        <h2 class="mb-4 font-display text-lg font-semibold text-navy-900">
+          1. ¿Qué estás publicando?
+        </h2>
+        <div class="mb-5">
+          <p class="field-label !mb-3">Tipo de propiedad</p>
+          <div class="flex flex-wrap gap-2">
+            <label class="type-option"
+              ><input type="radio" name="property_type" value="Casa" /><span
+                >Casa</span
+              ></label
+            >
+            <label class="type-option"
+              ><input
+                type="radio"
+                name="property_type"
+                value="Departamento"
+              /><span>Departamento</span></label
+            >
+            <label class="type-option"
+              ><input
+                type="radio"
+                name="property_type"
+                value="Condominio"
+              /><span>Condominio</span></label
+            >
+            <label class="type-option"
+              ><input type="radio" name="property_type" value="Terreno" /><span
+                >Terreno</span
+              ></label
+            >
+          </div>
+        </div>
+        <div>
+          <p class="field-label !mb-3">¿Es para vender o arrendar?</p>
+          <div class="flex flex-wrap gap-2">
+            <label class="type-option"
+              ><input type="radio" name="operation" value="Venta" /><span
+                >Venta</span
+              ></label
+            >
+            <label class="type-option"
+              ><input type="radio" name="operation" value="Arriendo" /><span
+                >Arriendo</span
+              ></label
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-sm border border-stone-200 bg-white p-6">
+        <h2 class="mb-1 font-display text-lg font-semibold text-navy-900">
+          2. Título y ubicación
+        </h2>
+        <p class="mb-4 font-body text-sm text-stone-500">
+          Cambiar el título no cambia la dirección web de la propiedad.
+        </p>
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="field-label" for="title"
+              >Título de la publicación</label
+            >
+            <input class="field" id="title" required />
+          </div>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label class="field-label" for="location">Sector o barrio</label>
+              <input class="field" id="location" required />
+            </div>
+            <div>
+              <label class="field-label" for="commune">Comuna</label>
+              <input class="field" id="commune" required list="commune-list" />
+              <datalist id="commune-list">
+                <option value="Chillán"></option>
+                <option value="Chillán Viejo"></option>
+                <option value="San Carlos"></option>
+                <option value="Bulnes"></option>
+              </datalist>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-sm border border-stone-200 bg-white p-6">
+        <h2 class="mb-1 font-display text-lg font-semibold text-navy-900">
+          3. Precio
+        </h2>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label class="field-label" for="price">Precio a mostrar</label>
+            <input class="field" id="price" required />
+          </div>
+          <div>
+            <label class="field-label" for="price_clp"
+              >Precio referencial en pesos (opcional)</label
+            >
+            <input class="field" id="price_clp" />
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-sm border border-stone-200 bg-white p-6">
+        <h2 class="mb-1 font-display text-lg font-semibold text-navy-900">
+          4. Detalles
+        </h2>
+        <p id="vivienda-help" class="mb-4 font-body text-sm text-stone-500">
+          Deja en blanco lo que no aplique.
+        </p>
+        <div
+          id="vivienda-fields"
+          class="mb-4 grid grid-cols-2 gap-4 sm:grid-cols-4"
+        >
+          <div>
+            <label class="field-label" for="beds">Habitaciones</label><input
+              class="field"
+              id="beds"
+              type="number"
+              min="0"
+            />
+          </div>
+          <div>
+            <label class="field-label" for="baths">Baños</label><input
+              class="field"
+              id="baths"
+              type="number"
+              min="0"
+            />
+          </div>
+          <div>
+            <label class="field-label" for="parking">Estacionamientos</label
+            ><input class="field" id="parking" type="number" min="0" />
+          </div>
+          <div>
+            <label class="field-label" for="built">Metros construidos</label
+            ><input class="field" id="built" placeholder="Ej: 180 m²" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label class="field-label" for="land">Metros de terreno</label
+            ><input class="field" id="land" placeholder="Ej: 450 m²" />
+          </div>
+          <div>
+            <label class="field-label" for="year"
+              >Año de construcción (opcional)</label
+            ><input class="field" id="year" />
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-sm border border-stone-200 bg-white p-6">
+        <h2 class="mb-1 font-display text-lg font-semibold text-navy-900">
+          5. Fotos
+        </h2>
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="field-label" for="image">Foto principal (link)</label>
+            <input class="field" id="image" type="url" required />
+          </div>
+          <div>
+            <label class="field-label" for="gallery"
+              >Fotos adicionales (un link por línea)</label
+            >
+            <textarea class="field resize-none" id="gallery" rows="3"
+            ></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-sm border border-stone-200 bg-white p-6">
+        <h2 class="mb-1 font-display text-lg font-semibold text-navy-900">
+          6. Descripción
+        </h2>
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="field-label" for="tag"
+              >Destacar con una etiqueta (opcional)</label
+            >
+            <input
+              class="field"
+              id="tag"
+              placeholder="Ej: Destacada, Nuevo, Inversión"
+            />
+          </div>
+          <div>
+            <label class="field-label" for="description"
+              >Descripción (un párrafo por línea)</label
+            >
+            <textarea class="field resize-none" id="description" rows="4"
+            ></textarea>
+          </div>
+          <div>
+            <label class="field-label" for="specs"
+              >Características técnicas (opcional)</label
+            >
+            <textarea class="field resize-none" id="specs" rows="3"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <p
+        id="form-error"
+        class="hidden rounded-sm bg-red-50 px-4 py-3 font-body text-sm text-red-600"
+      >
+      </p>
+      <div class="flex gap-3">
+        <button type="submit" id="submit-btn" class="btn-primary flex-1"
+          >Guardar cambios</button
+        >
+        <button
+          type="button"
+          id="delete-btn"
+          class="rounded-sm border border-red-200 px-6 py-3.5 font-ui text-sm font-semibold text-red-600 hover:bg-red-50"
+          >Eliminar</button
+        >
+      </div>
     </form>
-  </section>
-</Layout>
+  </div>
+</AdminLayout>
+
+<style>
+  .type-option {
+    @apply cursor-pointer rounded-sm border border-stone-200 px-4 py-2 font-ui text-sm font-medium text-stone-600 transition-colors;
+  }
+  .type-option input {
+    @apply sr-only;
+  }
+  .type-option:has(input:checked) {
+    @apply border-navy-800 bg-navy-800 text-paper;
+  }
+</style>
 
 <script define:vars={{ propertyId: id }}>
   import { supabase } from "../../../lib/supabase.js";
@@ -31,8 +262,10 @@ const { id } = Astro.params;
   const guard = document.getElementById("admin-guard");
   const form = document.getElementById("property-form");
   const viviendaFields = document.getElementById("vivienda-fields");
-  const typeSelect = document.getElementById("property_type");
+  const viviendaHelp = document.getElementById("vivienda-help");
   const errorEl = document.getElementById("form-error");
+  const submitBtn = document.getElementById("submit-btn");
+  const deleteBtn = document.getElementById("delete-btn");
 
   const {
     data: { session },
@@ -64,11 +297,29 @@ const { id } = Astro.params;
     }
   }
 
+  function setRadioValue(name, value) {
+    const el = document.querySelector(
+      `input[name="${name}"][value="${value}"]`,
+    );
+    if (el) el.checked = true;
+  }
+  function getTypeSelectValue() {
+    return (
+      document.querySelector('input[name="property_type"]:checked')?.value ??
+      "Casa"
+    );
+  }
+  function getOperationValue() {
+    return (
+      document.querySelector('input[name="operation"]:checked')?.value ??
+      "Venta"
+    );
+  }
+
   function fillForm(p) {
-    document.getElementById("slug").value = p.slug;
     document.getElementById("title").value = p.title;
-    typeSelect.value = p.property_type;
-    document.getElementById("operation").value = p.operation;
+    setRadioValue("property_type", p.property_type);
+    setRadioValue("operation", p.operation);
     document.getElementById("tag").value = p.tag ?? "";
     document.getElementById("location").value = p.location;
     document.getElementById("commune").value = p.commune;
@@ -92,10 +343,15 @@ const { id } = Astro.params;
   }
 
   function toggleViviendaFields() {
-    viviendaFields.style.display =
-      typeSelect.value === "Terreno" ? "none" : "grid";
+    const isTerreno = getTypeSelectValue() === "Terreno";
+    viviendaFields.style.display = isTerreno ? "none" : "grid";
+    viviendaHelp.textContent = isTerreno
+      ? "Los terrenos no requieren habitaciones ni baños."
+      : "Deja en blanco lo que no aplique.";
   }
-  typeSelect?.addEventListener("change", toggleViviendaFields);
+  document
+    .querySelectorAll('input[name="property_type"]')
+    .forEach((el) => el.addEventListener("change", toggleViviendaFields));
 
   function linesToArray(value) {
     return value
@@ -118,14 +374,16 @@ const { id } = Astro.params;
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     errorEl.classList.add("hidden");
-    const isTerreno = typeSelect.value === "Terreno";
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Guardando...";
+
+    const isTerreno = getTypeSelectValue() === "Terreno";
     const val = (id) => document.getElementById(id).value.trim();
 
     const payload = {
-      slug: val("slug"),
       title: val("title"),
-      property_type: typeSelect.value,
-      operation: val("operation"),
+      property_type: getTypeSelectValue(),
+      operation: getOperationValue(),
       tag: val("tag") || null,
       location: val("location"),
       commune: val("commune"),
@@ -148,8 +406,24 @@ const { id } = Astro.params;
       .update(payload)
       .eq("id", propertyId);
     if (error) {
-      errorEl.textContent = "Error al guardar: " + error.message;
+      errorEl.textContent = "No se pudo guardar: " + error.message;
       errorEl.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Guardar cambios";
+      return;
+    }
+    window.location.href = "/admin";
+  });
+
+  deleteBtn?.addEventListener("click", async () => {
+    if (!confirm("¿Eliminar esta propiedad? Esta acción no se puede deshacer."))
+      return;
+    const { error } = await supabase
+      .from("properties")
+      .delete()
+      .eq("id", propertyId);
+    if (error) {
+      alert("No se pudo eliminar: " + error.message);
       return;
     }
     window.location.href = "/admin";

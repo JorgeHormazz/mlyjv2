@@ -1,17 +1,25 @@
 ---
-import Layout from "../../layouts/Layout.astro";
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { site } from "../../data/site.js";
 ---
 
-<Layout title="Ingreso administrador" description="Acceso privado">
-  <section
-    class="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-5 py-16"
-  >
-    <h1 class="mb-2 font-display text-3xl font-semibold text-navy-900">
-      Panel administrador
-    </h1>
-    <p class="mb-8 font-body text-sm text-stone-600">
-      Ingresa con tu cuenta autorizada para gestionar las propiedades.
-    </p>
+<AdminLayout title="Ingreso" showSidebar={false}>
+  <div class="w-full max-w-sm rounded-sm bg-white p-8 shadow-cardLg">
+    <div class="mb-6 flex flex-col items-center text-center">
+      <img
+        src="/logo.png"
+        alt={site.name}
+        class="mb-4 h-14 w-14 rounded-sm object-contain"
+      />
+      <h1 class="font-display text-2xl font-semibold text-navy-900">
+        Panel administrador
+      </h1>
+      <p class="mt-2 font-body text-sm text-stone-600">
+        Ingresa con tu correo y contraseña para gestionar las propiedades del
+        sitio.
+      </p>
+    </div>
+
     <form id="login-form" class="flex flex-col gap-4">
       <div>
         <label class="field-label" for="email">Correo</label>
@@ -21,6 +29,7 @@ import Layout from "../../layouts/Layout.astro";
           type="email"
           required
           autocomplete="username"
+          placeholder="tucorreo@ejemplo.com"
         />
       </div>
       <div>
@@ -33,17 +42,33 @@ import Layout from "../../layouts/Layout.astro";
           autocomplete="current-password"
         />
       </div>
-      <p id="login-error" class="hidden font-body text-sm text-red-600"></p>
-      <button type="submit" class="btn-primary w-full">Ingresar</button>
+      <p
+        id="login-error"
+        class="hidden rounded-sm bg-red-50 px-3 py-2 font-body text-sm text-red-600"
+      >
+      </p>
+      <button type="submit" id="login-submit" class="btn-primary w-full"
+        >Ingresar</button
+      >
     </form>
-  </section>
-</Layout>
+
+    <a
+      href="/"
+      class="mt-6 block text-center font-ui text-xs text-stone-500 hover:text-navy-800"
+    >
+      ← Volver al sitio web
+    </a>
+  </div>
+</AdminLayout>
 
 <script>
   import { supabase } from "../../lib/supabase.js";
 
   const form = document.getElementById("login-form") as HTMLFormElement;
   const errorEl = document.getElementById("login-error") as HTMLElement;
+  const submitBtn = document.getElementById(
+    "login-submit",
+  ) as HTMLButtonElement;
   const emailInput = document.getElementById("email") as HTMLInputElement;
   const passInput = document.getElementById("password") as HTMLInputElement;
 
@@ -55,6 +80,8 @@ import Layout from "../../layouts/Layout.astro";
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     errorEl.classList.add("hidden");
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Ingresando...";
 
     const { error } = await supabase.auth.signInWithPassword({
       email: emailInput.value,
@@ -62,8 +89,11 @@ import Layout from "../../layouts/Layout.astro";
     });
 
     if (error) {
-      errorEl.textContent = "Credenciales inválidas.";
+      errorEl.textContent =
+        "Correo o contraseña incorrectos. Intenta nuevamente.";
       errorEl.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Ingresar";
       return;
     }
     window.location.href = "/admin";
