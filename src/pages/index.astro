@@ -2,9 +2,10 @@
 import Layout from "../layouts/Layout.astro";
 import PropertyCard from "../components/PropertyCard.astro";
 import Coordinates from "../components/Coordinates.astro";
-import { properties, communes, types } from "../data/properties.js";
+import { getAllProperties, communes, types } from "../lib/properties.js";
 import { site, whatsappLink, telLink } from "../data/site.js";
 
+const properties = await getAllProperties();
 const featured = properties.slice(0, 5);
 ---
 

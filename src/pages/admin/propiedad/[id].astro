@@ -1,0 +1,157 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+const { id } = Astro.params;
+---
+
+<Layout title="Editar propiedad" description="Panel administrador">
+  <section class="mx-auto max-w-3xl px-5 py-10 md:px-12">
+    <p class="eyebrow mb-2">Panel administrador</p>
+    <h1 class="mb-8 font-display text-3xl font-semibold text-navy-900">
+      Editar propiedad
+    </h1>
+
+    <div id="admin-guard" class="font-body text-sm text-stone-500">
+      Verificando sesión...
+    </div>
+
+    <form id="property-form" class="hidden flex-col gap-5">
+      <!-- Mismos campos que el formulario de "nueva.astro" (slug, title, property_type,
+           operation, tag, location, commune, price, price_clp, vivienda-fields con
+           beds/baths/parking/built, land, year, image, gallery, description, specs) -->
+      <!-- ...copiar exactamente el bloque de <div>/<input>/<select>/<textarea> de arriba... -->
+      <p id="form-error" class="hidden font-body text-sm text-red-600"></p>
+      <button type="submit" class="btn-primary w-full">Guardar cambios</button>
+    </form>
+  </section>
+</Layout>
+
+<script define:vars={{ propertyId: id }}>
+  import { supabase } from "../../../lib/supabase.js";
+
+  const guard = document.getElementById("admin-guard");
+  const form = document.getElementById("property-form");
+  const viviendaFields = document.getElementById("vivienda-fields");
+  const typeSelect = document.getElementById("property_type");
+  const errorEl = document.getElementById("form-error");
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) {
+    window.location.href = "/admin/login";
+  } else {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", session.user.id)
+      .single();
+    if (!profile || profile.role !== "admin") {
+      guard.textContent = "Tu cuenta no tiene permisos de administrador.";
+    } else {
+      const { data: property, error } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("id", propertyId)
+        .single();
+      if (error || !property) {
+        guard.textContent = "Propiedad no encontrada.";
+      } else {
+        guard.classList.add("hidden");
+        form.classList.remove("hidden");
+        form.classList.add("flex");
+        fillForm(property);
+      }
+    }
+  }
+
+  function fillForm(p) {
+    document.getElementById("slug").value = p.slug;
+    document.getElementById("title").value = p.title;
+    typeSelect.value = p.property_type;
+    document.getElementById("operation").value = p.operation;
+    document.getElementById("tag").value = p.tag ?? "";
+    document.getElementById("location").value = p.location;
+    document.getElementById("commune").value = p.commune;
+    document.getElementById("price").value = p.price;
+    document.getElementById("price_clp").value = p.price_clp ?? "";
+    document.getElementById("beds").value = p.beds ?? "";
+    document.getElementById("baths").value = p.baths ?? "";
+    document.getElementById("parking").value = p.parking ?? "";
+    document.getElementById("built").value = p.built ?? "";
+    document.getElementById("land").value = p.land ?? "";
+    document.getElementById("year").value = p.year ?? "";
+    document.getElementById("image").value = p.image;
+    document.getElementById("gallery").value = (p.gallery ?? []).join("\n");
+    document.getElementById("description").value = (p.description ?? []).join(
+      "\n",
+    );
+    document.getElementById("specs").value = (p.specs ?? [])
+      .map(([l, v]) => `${l}: ${v}`)
+      .join("\n");
+    toggleViviendaFields();
+  }
+
+  function toggleViviendaFields() {
+    viviendaFields.style.display =
+      typeSelect.value === "Terreno" ? "none" : "grid";
+  }
+  typeSelect?.addEventListener("change", toggleViviendaFields);
+
+  function linesToArray(value) {
+    return value
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+  }
+  function specsToArray(value) {
+    return linesToArray(value).map((line) => {
+      const idx = line.indexOf(":");
+      return idx === -1
+        ? [line, ""]
+        : [line.slice(0, idx).trim(), line.slice(idx + 1).trim()];
+    });
+  }
+  function toIntOrNull(value) {
+    return value === "" ? null : parseInt(value, 10);
+  }
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorEl.classList.add("hidden");
+    const isTerreno = typeSelect.value === "Terreno";
+    const val = (id) => document.getElementById(id).value.trim();
+
+    const payload = {
+      slug: val("slug"),
+      title: val("title"),
+      property_type: typeSelect.value,
+      operation: val("operation"),
+      tag: val("tag") || null,
+      location: val("location"),
+      commune: val("commune"),
+      price: val("price"),
+      price_clp: val("price_clp") || null,
+      beds: isTerreno ? null : toIntOrNull(val("beds")),
+      baths: isTerreno ? null : toIntOrNull(val("baths")),
+      parking: isTerreno ? null : toIntOrNull(val("parking")),
+      built: isTerreno ? null : val("built") || null,
+      land: val("land") || null,
+      year: val("year") || null,
+      image: val("image"),
+      gallery: linesToArray(document.getElementById("gallery").value),
+      description: linesToArray(document.getElementById("description").value),
+      specs: specsToArray(document.getElementById("specs").value),
+    };
+
+    const { error } = await supabase
+      .from("properties")
+      .update(payload)
+      .eq("id", propertyId);
+    if (error) {
+      errorEl.textContent = "Error al guardar: " + error.message;
+      errorEl.classList.remove("hidden");
+      return;
+    }
+    window.location.href = "/admin";
+  });
+</script>

@@ -1,0 +1,127 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Panel administrador" description="Gestión de propiedades">
+  <section class="mx-auto max-w-6xl px-5 py-10 md:px-12">
+    <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <p class="eyebrow mb-2">Panel administrador</p>
+        <h1 class="font-display text-3xl font-semibold text-navy-900">
+          Propiedades
+        </h1>
+      </div>
+      <div class="flex gap-3">
+        <a href="/admin/propiedad/nueva" class="btn-primary"
+          >+ Nueva propiedad</a
+        >
+        <button id="logout-btn" class="btn-outline">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <div id="admin-guard" class="font-body text-sm text-stone-500">
+      Verificando sesión...
+    </div>
+
+    <div
+      id="admin-content"
+      class="hidden overflow-x-auto rounded-sm border border-stone-200 bg-white shadow-card"
+    >
+      <table class="w-full text-left font-body text-sm">
+        <thead
+          class="border-b border-stone-200 bg-stone-50 text-xs uppercase tracking-wide text-stone-500"
+        >
+          <tr>
+            <th class="px-4 py-3">Título</th>
+            <th class="px-4 py-3">Tipo</th>
+            <th class="px-4 py-3">Comuna</th>
+            <th class="px-4 py-3">Precio</th>
+            <th class="px-4 py-3 text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="properties-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  import { supabase } from "../../lib/supabase.js";
+
+  const guard = document.getElementById("admin-guard");
+  const content = document.getElementById("admin-content");
+  const tbody = document.getElementById("properties-tbody");
+  const logoutBtn = document.getElementById("logout-btn");
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) {
+    window.location.href = "/admin/login";
+  } else {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", session.user.id)
+      .single();
+
+    if (!profile || profile.role !== "admin") {
+      guard.textContent = "Tu cuenta no tiene permisos de administrador.";
+      await supabase.auth.signOut();
+    } else {
+      guard.classList.add("hidden");
+      content.classList.remove("hidden");
+      await loadProperties();
+    }
+  }
+
+  async function loadProperties() {
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      tbody.innerHTML = `<tr><td class="px-4 py-4 text-red-600" colspan="5">Error cargando propiedades.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = data
+      .map(
+        (p) => `
+      <tr class="border-b border-stone-100 last:border-0">
+        <td class="px-4 py-3 font-medium text-navy-900">${p.title}</td>
+        <td class="px-4 py-3">${p.property_type}</td>
+        <td class="px-4 py-3">${p.commune}</td>
+        <td class="px-4 py-3">${p.price}</td>
+        <td class="px-4 py-3 text-right">
+          <a class="mr-3 text-navy-800 hover:text-gold-dark" href="/admin/propiedad/${p.id}">Editar</a>
+          <button data-id="${p.id}" class="delete-btn text-red-600 hover:text-red-800">Eliminar</button>
+        </td>
+      </tr>
+    `,
+      )
+      .join("");
+
+    document.querySelectorAll(".delete-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (!confirm("¿Eliminar esta propiedad? No se puede deshacer.")) return;
+        const id = btn.getAttribute("data-id");
+        const { error } = await supabase
+          .from("properties")
+          .delete()
+          .eq("id", id);
+        if (error) {
+          alert("No se pudo eliminar: " + error.message);
+          return;
+        }
+        await loadProperties();
+      });
+    });
+  }
+
+  logoutBtn?.addEventListener("click", async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/admin/login";
+  });
+</script>

@@ -1,121 +1,195 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import PropertyCard from '../../components/PropertyCard.astro';
-import { properties, communes, types } from '../../data/properties.js';
+import Layout from "../../layouts/Layout.astro";
+import PropertyCard from "../../components/PropertyCard.astro";
+import { getAllProperties, communes, types } from "../../lib/properties.js";
+
+const properties = await getAllProperties();
 ---
-<Layout title="Propiedades" active="propiedades" description="Explora casas, departamentos y terrenos disponibles en la Región de Ñuble.">
+
+<Layout
+  title="Propiedades"
+  active="propiedades"
+  description="Explora casas, departamentos y terrenos disponibles en la Región de Ñuble."
+>
   <section class="mx-auto max-w-7xl px-5 py-14 md:px-12">
     <p class="eyebrow mb-3">Catálogo</p>
-    <h1 class="font-display text-3xl font-semibold text-navy-900 md:text-4xl">Propiedades disponibles</h1>
+    <h1 class="font-display text-3xl font-semibold text-navy-900 md:text-4xl">
+      Propiedades disponibles
+    </h1>
     <p class="mt-3 max-w-xl font-body text-stone-600">
       Encuentra tu próxima casa, departamento o terreno en la Región de Ñuble.
     </p>
   </section>
 
-  <section class="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-5 pb-24 md:grid-cols-4 md:px-12">
-    <!-- Filters -->
+  <section
+    class="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-5 pb-24 md:grid-cols-4 md:px-12"
+  >
     <aside class="md:col-span-1">
-      <div class="sticky top-24 flex flex-col gap-6 rounded-sm border border-stone-200 bg-white p-6 shadow-card">
+      <div
+        class="sticky top-24 flex flex-col gap-6 rounded-sm border border-stone-200 bg-white p-6 shadow-card"
+      >
         <div>
-          <h3 class="mb-3 font-ui text-[11px] font-semibold uppercase tracking-widest2 text-stone-600">Comuna</h3>
+          <h3
+            class="mb-3 font-ui text-[11px] font-semibold uppercase tracking-widest2 text-stone-600"
+          >
+            Comuna
+          </h3>
           <div class="flex flex-col gap-2" id="filter-commune">
-            <label class="flex items-center gap-2 font-body text-sm text-stone-700">
-              <input type="checkbox" value="" class="commune-check accent-navy-800" checked /> Todas
+            <label
+              class="flex items-center gap-2 font-body text-sm text-stone-700"
+            >
+              <input
+                type="checkbox"
+                value=""
+                class="commune-check accent-navy-800"
+                checked
+              /> Todas
             </label>
-            {communes.map((c) => (
-              <label class="flex items-center gap-2 font-body text-sm text-stone-700">
-                <input type="checkbox" value={c} class="commune-check accent-navy-800" /> {c}
-              </label>
-            ))}
+            {
+              communes.map((c) => (
+                <label class="flex items-center gap-2 font-body text-sm text-stone-700">
+                  <input
+                    type="checkbox"
+                    value={c}
+                    class="commune-check accent-navy-800"
+                  />{" "}
+                  {c}
+                </label>
+              ))
+            }
           </div>
         </div>
         <div class="border-t border-stone-100 pt-5">
-          <h3 class="mb-3 font-ui text-[11px] font-semibold uppercase tracking-widest2 text-stone-600">Tipo de propiedad</h3>
+          <h3
+            class="mb-3 font-ui text-[11px] font-semibold uppercase tracking-widest2 text-stone-600"
+          >
+            Tipo de propiedad
+          </h3>
           <div class="flex flex-col gap-2" id="filter-type">
-            <label class="flex items-center gap-2 font-body text-sm text-stone-700">
-              <input type="radio" name="type" value="" class="type-radio accent-navy-800" checked /> Todos
+            <label
+              class="flex items-center gap-2 font-body text-sm text-stone-700"
+            >
+              <input
+                type="radio"
+                name="type"
+                value=""
+                class="type-radio accent-navy-800"
+                checked
+              /> Todos
             </label>
-            {types.map((t) => (
-              <label class="flex items-center gap-2 font-body text-sm text-stone-700">
-                <input type="radio" name="type" value={t} class="type-radio accent-navy-800" /> {t}
-              </label>
-            ))}
+            {
+              types.map((t) => (
+                <label class="flex items-center gap-2 font-body text-sm text-stone-700">
+                  <input
+                    type="radio"
+                    name="type"
+                    value={t}
+                    class="type-radio accent-navy-800"
+                  />{" "}
+                  {t}
+                </label>
+              ))
+            }
           </div>
         </div>
-        <button id="reset-filters" class="btn-outline w-full">Limpiar filtros</button>
+        <button id="reset-filters" class="btn-outline w-full"
+          >Limpiar filtros</button
+        >
       </div>
     </aside>
 
-    <!-- Grid -->
     <div class="md:col-span-3">
       <p id="results-count" class="mb-6 font-body text-sm text-stone-500">
         {properties.length} propiedades encontradas
       </p>
-      <div id="property-grid" class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-        {properties.map((p) => (
-          <div class="property-item" data-commune={p.commune} data-type={p.type}>
-            <PropertyCard property={p} />
-          </div>
-        ))}
+      <div
+        id="property-grid"
+        class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3"
+      >
+        {
+          properties.map((p) => (
+            <div
+              class="property-item"
+              data-commune={p.commune}
+              data-type={p.property_type}
+            >
+              <PropertyCard property={p} />
+            </div>
+          ))
+        }
       </div>
-      <p id="empty-state" class="hidden py-16 text-center font-body text-stone-500">
-        No encontramos propiedades con esos filtros. Prueba ajustando la búsqueda.
+      <p
+        id="empty-state"
+        class="hidden py-16 text-center font-body text-stone-500"
+      >
+        No encontramos propiedades con esos filtros. Prueba ajustando la
+        búsqueda.
       </p>
     </div>
   </section>
 </Layout>
 
 <script>
-  const communeChecks = Array.from(document.querySelectorAll<HTMLInputElement>('.commune-check'));
-  const typeRadios = Array.from(document.querySelectorAll<HTMLInputElement>('.type-radio'));
-  const items = Array.from(document.querySelectorAll<HTMLElement>('.property-item'));
-  const resultsCount = document.getElementById('results-count');
-  const emptyState = document.getElementById('empty-state');
-  const resetBtn = document.getElementById('reset-filters');
+  const communeChecks = Array.from(
+    document.querySelectorAll<HTMLInputElement>(".commune-check"),
+  );
+  const typeRadios = Array.from(
+    document.querySelectorAll<HTMLInputElement>(".type-radio"),
+  );
+  const items = Array.from(
+    document.querySelectorAll<HTMLElement>(".property-item"),
+  );
+  const resultsCount = document.getElementById("results-count");
+  const emptyState = document.getElementById("empty-state");
+  const resetBtn = document.getElementById("reset-filters");
 
   function applyFilters() {
     const activeCommunes = communeChecks
-      .filter((c) => c.checked && c.value !== '')
+      .filter((c) => c.checked && c.value !== "")
       .map((c) => c.value);
-    const activeType = typeRadios.find((r) => r.checked)?.value ?? '';
+    const activeType = typeRadios.find((r) => r.checked)?.value ?? "";
 
     let visible = 0;
     items.forEach((item) => {
-      const commune = item.dataset.commune ?? '';
-      const type = item.dataset.type ?? '';
-      const communeMatch = activeCommunes.length === 0 || activeCommunes.includes(commune);
-      const typeMatch = activeType === '' || type === activeType;
+      const commune = item.dataset.commune ?? "";
+      const type = item.dataset.type ?? "";
+      const communeMatch =
+        activeCommunes.length === 0 || activeCommunes.includes(commune);
+      const typeMatch = activeType === "" || type === activeType;
       const show = communeMatch && typeMatch;
-      item.style.display = show ? '' : 'none';
+      item.style.display = show ? "" : "none";
       if (show) visible += 1;
     });
 
-    if (resultsCount) resultsCount.textContent = `${visible} propiedad${visible === 1 ? '' : 'es'} encontrada${visible === 1 ? '' : 's'}`;
-    emptyState?.classList.toggle('hidden', visible !== 0);
+    if (resultsCount)
+      resultsCount.textContent = `${visible} propiedad${visible === 1 ? "" : "es"} encontrada${visible === 1 ? "" : "s"}`;
+    emptyState?.classList.toggle("hidden", visible !== 0);
   }
 
   communeChecks.forEach((box) => {
-    box.addEventListener('change', () => {
-      if (box.value === '' && box.checked) {
-        communeChecks.forEach((c) => { if (c.value !== '') c.checked = false; });
-      } else if (box.value !== '' && box.checked) {
-        const all = communeChecks.find((c) => c.value === '');
+    box.addEventListener("change", () => {
+      if (box.value === "" && box.checked) {
+        communeChecks.forEach((c) => {
+          if (c.value !== "") c.checked = false;
+        });
+      } else if (box.value !== "" && box.checked) {
+        const all = communeChecks.find((c) => c.value === "");
         if (all) all.checked = false;
       }
       const anyChecked = communeChecks.some((c) => c.checked);
       if (!anyChecked) {
-        const all = communeChecks.find((c) => c.value === '');
+        const all = communeChecks.find((c) => c.value === "");
         if (all) all.checked = true;
       }
       applyFilters();
     });
   });
 
-  typeRadios.forEach((radio) => radio.addEventListener('change', applyFilters));
+  typeRadios.forEach((radio) => radio.addEventListener("change", applyFilters));
 
-  resetBtn?.addEventListener('click', () => {
-    communeChecks.forEach((c) => (c.checked = c.value === ''));
-    typeRadios.forEach((r) => (r.checked = r.value === ''));
+  resetBtn?.addEventListener("click", () => {
+    communeChecks.forEach((c) => (c.checked = c.value === ""));
+    typeRadios.forEach((r) => (r.checked = r.value === ""));
     applyFilters();
   });
 </script>

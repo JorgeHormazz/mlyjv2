@@ -1,20 +1,30 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import PropertyCard from '../../components/PropertyCard.astro';
-import { properties } from '../../data/properties.js';
+import { getAllProperties, getPropertyBySlug } from '../../lib/properties.js';
 import { site, telLink, whatsappLink, propertyWhatsappMessage } from '../../data/site.js';
 
-export function getStaticPaths() {
-  return properties.map((p) => ({
-    params: { slug: p.slug },
-    props: { property: p },
-  }));
+export const prerender = false; // se resuelve en cada request contra Supabase
+
+const { slug } = Astro.params;
+const property = await getPropertyBySlug(slug);
+
+if (!property) {
+  return Astro.redirect('/propiedades');
 }
 
-const { property } = Astro.props;
-const related = properties.filter((p) => p.slug !== property.slug).slice(0, 3);
+const allProperties = await getAllProperties();
+const related = allProperties.filter((p) => p.slug !== property.slug).slice(0, 3);
+
+// Solo se arma con los datos que la propiedad realmente tiene
+const stats = [
+  property.beds != null ? ['Habitaciones', property.beds] : null,
+  property.baths != null ? ['Baños', property.baths] : null,
+  property.built ? ['Construidos', property.built] : null,
+  property.land ? ['Terreno', property.land] : null,
+].filter(Boolean);
 ---
-<Layout title={property.title} active="propiedades" description={property.description[0]}>
+<Layout title={property.title} active="propiedades" description={property.description?.[0] ?? property.title}>
   <nav class="mx-auto max-w-7xl px-5 pt-6 font-body text-xs text-stone-500 md:px-12">
     <a href="/" class="hover:text-navy-800">Inicio</a>
     <span class="mx-2">/</span>
@@ -23,20 +33,15 @@ const related = properties.filter((p) => p.slug !== property.slug).slice(0, 3);
     <span class="text-navy-800">{property.title}</span>
   </nav>
 
-  <!-- Gallery -->
   <section class="mx-auto max-w-7xl px-5 py-6 md:px-12">
     <div class="grid grid-cols-1 gap-3 md:grid-cols-4 md:grid-rows-2" id="gallery">
-      <button
-        type="button"
-        class="lightbox-trigger group relative h-72 overflow-hidden rounded-sm md:col-span-2 md:row-span-2 md:h-full"
-        data-index="0"
-      >
+      <button type="button" class="lightbox-trigger group relative h-72 overflow-hidden rounded-sm md:col-span-2 md:row-span-2 md:h-full" data-index="0">
         <img src={property.image} alt={property.title} class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
         <span class="absolute left-4 top-4 rounded-sm bg-gold px-3 py-1 font-ui text-[11px] font-bold uppercase tracking-wider text-navy-950 shadow-sm">
           {property.operation}
         </span>
       </button>
-      {property.gallery.slice(0, 4).map((img, i) => (
+      {(property.gallery ?? []).slice(0, 4).map((img, i) => (
         <button type="button" class="lightbox-trigger group hidden h-40 overflow-hidden rounded-sm md:block" data-index={i + 1}>
           <img src={img} alt={property.title} class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
         </button>
@@ -44,84 +49,72 @@ const related = properties.filter((p) => p.slug !== property.slug).slice(0, 3);
     </div>
   </section>
 
-  <!-- Lightbox -->
   <div id="lightbox" class="fixed inset-0 z-[60] hidden items-center justify-center bg-navy-950/95 p-4 md:p-10">
     <button id="lightbox-close" aria-label="Cerrar" class="absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-full bg-paper/10 text-paper transition-colors hover:bg-paper/20">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
     </button>
     <button id="lightbox-prev" aria-label="Anterior" class="absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-paper/10 text-paper transition-colors hover:bg-paper/20 md:left-6">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
     </button>
     <img id="lightbox-image" src="" alt={property.title} class="max-h-[85vh] max-w-full rounded-sm object-contain shadow-cardLg" />
     <button id="lightbox-next" aria-label="Siguiente" class="absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-paper/10 text-paper transition-colors hover:bg-paper/20 md:right-6">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
     </button>
     <p id="lightbox-count" class="absolute bottom-5 left-1/2 -translate-x-1/2 font-ui text-xs text-paper/70"></p>
   </div>
 
   <section class="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-5 pb-24 md:grid-cols-3 md:px-12">
-    <!-- Details -->
     <div class="flex flex-col gap-10 md:col-span-2">
       <div class="border-b border-stone-200 pb-8">
-        <p class="eyebrow mb-3">{property.type} · {property.commune}</p>
+        <p class="eyebrow mb-3">{property.property_type} · {property.commune}</p>
         <h1 class="font-display text-3xl font-semibold text-navy-900 md:text-4xl">{property.title}</h1>
         <p class="mt-2 flex items-center gap-1 font-body text-stone-600">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
           {property.location}
         </p>
         <p class="mt-4 font-display text-3xl font-semibold text-gold-dark">{property.price}</p>
-        <p class="font-body text-sm text-stone-500">{property.priceCLP}</p>
+        {property.price_clp && <p class="font-body text-sm text-stone-500">{property.price_clp}</p>}
       </div>
 
-      <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {[
-          ['bed', 'Habitaciones', property.beds ?? '—'],
-          ['bath', 'Baños', property.baths ?? '—'],
-          ['built', 'Construidos', property.built],
-          ['land', 'Terreno', property.land],
-        ].map(([icon, label, value]) => (
-          <div class="flex flex-col items-center gap-1 rounded-sm bg-stone-50 py-5 text-center">
-            <span class="font-display text-xl font-semibold text-navy-900">{value}</span>
-            <span class="font-ui text-[10px] font-semibold uppercase tracking-widest2 text-stone-500">{label}</span>
-          </div>
-        ))}
-      </div>
-
-      <div>
-        <h2 class="mb-4 font-display text-2xl font-semibold text-navy-900">Descripción</h2>
-        <div class="flex flex-col gap-4 font-body leading-relaxed text-stone-700">
-          {property.description.map((p) => <p>{p}</p>)}
-        </div>
-      </div>
-
-      <div class="border-t border-stone-200 pt-8">
-        <h2 class="mb-4 font-display text-2xl font-semibold text-navy-900">Características técnicas</h2>
-        <ul class="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
-          {property.specs.map(([label, value]) => (
-            <li class="flex justify-between border-b border-stone-100 pb-3 font-body text-sm">
-              <span class="text-stone-500">{label}</span>
-              <span class="font-medium text-navy-900">{value}</span>
-            </li>
+      {stats.length > 0 && (
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {stats.map(([label, value]) => (
+            <div class="flex flex-col items-center gap-1 rounded-sm bg-stone-50 py-5 text-center">
+              <span class="font-display text-xl font-semibold text-navy-900">{value}</span>
+              <span class="font-ui text-[10px] font-semibold uppercase tracking-widest2 text-stone-500">{label}</span>
+            </div>
           ))}
-        </ul>
-      </div>
+        </div>
+      )}
+
+      {property.description?.length > 0 && (
+        <div>
+          <h2 class="mb-4 font-display text-2xl font-semibold text-navy-900">Descripción</h2>
+          <div class="flex flex-col gap-4 font-body leading-relaxed text-stone-700">
+            {property.description.map((p) => <p>{p}</p>)}
+          </div>
+        </div>
+      )}
+
+      {property.specs?.length > 0 && (
+        <div class="border-t border-stone-200 pt-8">
+          <h2 class="mb-4 font-display text-2xl font-semibold text-navy-900">Características técnicas</h2>
+          <ul class="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
+            {property.specs.map(([label, value]) => (
+              <li class="flex justify-between border-b border-stone-100 pb-3 font-body text-sm">
+                <span class="text-stone-500">{label}</span>
+                <span class="font-medium text-navy-900">{value}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
 
-    <!-- Agent / contact sidebar -->
     <aside class="md:col-span-1">
       <div class="sticky top-24 flex flex-col gap-6 rounded-sm border border-stone-200 bg-white p-6 shadow-cardLg">
         <div class="flex items-center gap-4">
-          <img
-            src="/logo.png"
-            alt={site.name}
-            class="h-14 w-14 rounded-sm object-contain"
-          />
+          <img src="/logo.png" alt={site.name} class="h-14 w-14 rounded-sm object-contain" />
           <div>
             <p class="font-display text-lg font-semibold text-navy-900">{site.shortName}</p>
             <p class="font-body text-sm text-stone-500">Asesoría personalizada</p>
@@ -146,7 +139,6 @@ const related = properties.filter((p) => p.slug !== property.slug).slice(0, 3);
     </aside>
   </section>
 
-  <!-- Related -->
   <section class="border-t border-stone-200 bg-stone-50 py-20">
     <div class="mx-auto max-w-7xl px-5 md:px-12">
       <h2 class="mb-8 font-display text-2xl font-semibold text-navy-900 md:text-3xl">
@@ -159,7 +151,7 @@ const related = properties.filter((p) => p.slug !== property.slug).slice(0, 3);
   </section>
 </Layout>
 
-<script define:vars={{ images: [property.image, ...property.gallery] }}>
+<script define:vars={{ images: [property.image, ...(property.gallery ?? [])] }}>
   const lightbox = document.getElementById('lightbox');
   const lightboxImage = document.getElementById('lightbox-image');
   const lightboxCount = document.getElementById('lightbox-count');
@@ -172,37 +164,22 @@ const related = properties.filter((p) => p.slug !== property.slug).slice(0, 3);
     lightboxImage.src = images[current];
     lightboxCount.textContent = `${current + 1} / ${images.length}`;
   }
-
   function open(index) {
-    current = index;
-    render();
-    lightbox.classList.remove('hidden');
-    lightbox.classList.add('flex');
+    current = index; render();
+    lightbox.classList.remove('hidden'); lightbox.classList.add('flex');
     document.body.style.overflow = 'hidden';
   }
-
   function close() {
-    lightbox.classList.add('hidden');
-    lightbox.classList.remove('flex');
+    lightbox.classList.add('hidden'); lightbox.classList.remove('flex');
     document.body.style.overflow = '';
   }
-
   document.querySelectorAll('.lightbox-trigger').forEach((el) => {
     el.addEventListener('click', () => open(Number(el.dataset.index)));
   });
-
   closeBtn?.addEventListener('click', close);
-  lightbox?.addEventListener('click', (e) => {
-    if (e.target === lightbox) close();
-  });
-  prevBtn?.addEventListener('click', () => {
-    current = (current - 1 + images.length) % images.length;
-    render();
-  });
-  nextBtn?.addEventListener('click', () => {
-    current = (current + 1) % images.length;
-    render();
-  });
+  lightbox?.addEventListener('click', (e) => { if (e.target === lightbox) close(); });
+  prevBtn?.addEventListener('click', () => { current = (current - 1 + images.length) % images.length; render(); });
+  nextBtn?.addEventListener('click', () => { current = (current + 1) % images.length; render(); });
   document.addEventListener('keydown', (e) => {
     if (lightbox.classList.contains('hidden')) return;
     if (e.key === 'Escape') close();

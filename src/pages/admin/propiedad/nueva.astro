@@ -1,0 +1,253 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+---
+
+<Layout title="Nueva propiedad" description="Panel administrador">
+  <section class="mx-auto max-w-3xl px-5 py-10 md:px-12">
+    <p class="eyebrow mb-2">Panel administrador</p>
+    <h1 class="mb-8 font-display text-3xl font-semibold text-navy-900">
+      Nueva propiedad
+    </h1>
+
+    <div id="admin-guard" class="font-body text-sm text-stone-500">
+      Verificando sesión...
+    </div>
+
+    <form id="property-form" class="hidden flex-col gap-5">
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div>
+          <label class="field-label" for="slug">Slug (URL)</label>
+          <input
+            class="field"
+            id="slug"
+            required
+            placeholder="casa-sector-norte-chillan"
+          />
+        </div>
+        <div>
+          <label class="field-label" for="title">Título</label>
+          <input class="field" id="title" required />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+        <div>
+          <label class="field-label" for="property_type"
+            >Tipo de propiedad</label
+          >
+          <select class="field" id="property_type" required>
+            <option value="Casa">Casa</option>
+            <option value="Departamento">Departamento</option>
+            <option value="Condominio">Condominio</option>
+            <option value="Terreno">Terreno</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label" for="operation">Operación</label>
+          <select class="field" id="operation">
+            <option value="Venta">Venta</option>
+            <option value="Arriendo">Arriendo</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label" for="tag">Etiqueta (opcional)</label>
+          <input
+            class="field"
+            id="tag"
+            placeholder="Destacada, Nuevo, Inversión..."
+          />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div>
+          <label class="field-label" for="location">Ubicación</label>
+          <input
+            class="field"
+            id="location"
+            required
+            placeholder="Sector Norte, Chillán"
+          />
+        </div>
+        <div>
+          <label class="field-label" for="commune">Comuna</label>
+          <input class="field" id="commune" required placeholder="Chillán" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div>
+          <label class="field-label" for="price">Precio (UF/CLP)</label>
+          <input class="field" id="price" required placeholder="UF 6.200" />
+        </div>
+        <div>
+          <label class="field-label" for="price_clp"
+            >Precio referencial CLP (opcional)</label
+          >
+          <input
+            class="field"
+            id="price_clp"
+            placeholder="Aprox. $230.000.000 CLP"
+          />
+        </div>
+      </div>
+
+      <!-- Campos exclusivos de casa/departamento/condominio -->
+      <div id="vivienda-fields" class="grid grid-cols-2 gap-5 sm:grid-cols-4">
+        <div>
+          <label class="field-label" for="beds">Habitaciones</label>
+          <input class="field" id="beds" type="number" min="0" />
+        </div>
+        <div>
+          <label class="field-label" for="baths">Baños</label>
+          <input class="field" id="baths" type="number" min="0" />
+        </div>
+        <div>
+          <label class="field-label" for="parking">Estacionamientos</label>
+          <input class="field" id="parking" type="number" min="0" />
+        </div>
+        <div>
+          <label class="field-label" for="built">Construidos (m²)</label>
+          <input class="field" id="built" placeholder="180 m²" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div>
+          <label class="field-label" for="land">Terreno (m²)</label>
+          <input class="field" id="land" placeholder="450 m²" />
+        </div>
+        <div>
+          <label class="field-label" for="year"
+            >Año de construcción (opcional)</label
+          >
+          <input class="field" id="year" placeholder="2018" />
+        </div>
+      </div>
+
+      <div>
+        <label class="field-label" for="image">Imagen principal (URL)</label>
+        <input class="field" id="image" type="url" required />
+      </div>
+      <div>
+        <label class="field-label" for="gallery"
+          >Galería (una URL por línea)</label
+        >
+        <textarea class="field resize-none" id="gallery" rows="3"></textarea>
+      </div>
+      <div>
+        <label class="field-label" for="description"
+          >Descripción (un párrafo por línea)</label
+        >
+        <textarea class="field resize-none" id="description" rows="4"
+        ></textarea>
+      </div>
+      <div>
+        <label class="field-label" for="specs"
+          >Características técnicas (una por línea: "Etiqueta: Valor")</label
+        >
+        <textarea
+          class="field resize-none"
+          id="specs"
+          rows="4"
+          placeholder="Orientación: Norponiente"></textarea>
+      </div>
+
+      <p id="form-error" class="hidden font-body text-sm text-red-600"></p>
+      <button type="submit" class="btn-primary w-full">Guardar propiedad</button
+      >
+    </form>
+  </section>
+</Layout>
+
+<script>
+  import { supabase } from "../../../lib/supabase.js";
+
+  const guard = document.getElementById("admin-guard");
+  const form = document.getElementById("property-form");
+  const viviendaFields = document.getElementById("vivienda-fields");
+  const typeSelect = document.getElementById("property_type");
+  const errorEl = document.getElementById("form-error");
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) {
+    window.location.href = "/admin/login";
+  } else {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", session.user.id)
+      .single();
+    if (!profile || profile.role !== "admin") {
+      guard.textContent = "Tu cuenta no tiene permisos de administrador.";
+    } else {
+      guard.classList.add("hidden");
+      form.classList.remove("hidden");
+      form.classList.add("flex");
+    }
+  }
+
+  function toggleViviendaFields() {
+    viviendaFields.style.display =
+      typeSelect.value === "Terreno" ? "none" : "grid";
+  }
+  typeSelect?.addEventListener("change", toggleViviendaFields);
+  toggleViviendaFields();
+
+  function linesToArray(value) {
+    return value
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+  }
+  function specsToArray(value) {
+    return linesToArray(value).map((line) => {
+      const idx = line.indexOf(":");
+      return idx === -1
+        ? [line, ""]
+        : [line.slice(0, idx).trim(), line.slice(idx + 1).trim()];
+    });
+  }
+  function toIntOrNull(value) {
+    return value === "" ? null : parseInt(value, 10);
+  }
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorEl.classList.add("hidden");
+    const isTerreno = typeSelect.value === "Terreno";
+    const val = (id) => document.getElementById(id).value.trim();
+
+    const payload = {
+      slug: val("slug"),
+      title: val("title"),
+      property_type: typeSelect.value,
+      operation: val("operation"),
+      tag: val("tag") || null,
+      location: val("location"),
+      commune: val("commune"),
+      price: val("price"),
+      price_clp: val("price_clp") || null,
+      beds: isTerreno ? null : toIntOrNull(val("beds")),
+      baths: isTerreno ? null : toIntOrNull(val("baths")),
+      parking: isTerreno ? null : toIntOrNull(val("parking")),
+      built: isTerreno ? null : val("built") || null,
+      land: val("land") || null,
+      year: val("year") || null,
+      image: val("image"),
+      gallery: linesToArray(document.getElementById("gallery").value),
+      description: linesToArray(document.getElementById("description").value),
+      specs: specsToArray(document.getElementById("specs").value),
+    };
+
+    const { error } = await supabase.from("properties").insert(payload);
+    if (error) {
+      errorEl.textContent = "Error al guardar: " + error.message;
+      errorEl.classList.remove("hidden");
+      return;
+    }
+    window.location.href = "/admin";
+  });
+</script>
