@@ -6,6 +6,9 @@ export async function getAllProperties() {
     .select("*")
     .order("created_at", { ascending: false });
 
+  console.log("DATA:", data);
+  console.log("ERROR:", error);
+
   if (error) {
     console.error("Error obteniendo propiedades:", error.message);
     return [];

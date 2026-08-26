@@ -163,11 +163,15 @@ import Layout from "../../../layouts/Layout.astro";
 <script>
   import { supabase } from "../../../lib/supabase.js";
 
-  const guard = document.getElementById("admin-guard");
-  const form = document.getElementById("property-form");
-  const viviendaFields = document.getElementById("vivienda-fields");
-  const typeSelect = document.getElementById("property_type");
-  const errorEl = document.getElementById("form-error");
+  const guard = document.getElementById("admin-guard") as HTMLElement;
+  const form = document.getElementById("property-form") as HTMLFormElement;
+  const viviendaFields = document.getElementById(
+    "vivienda-fields",
+  ) as HTMLElement;
+  const typeSelect = document.getElementById(
+    "property_type",
+  ) as HTMLSelectElement;
+  const errorEl = document.getElementById("form-error") as HTMLElement;
 
   const {
     data: { session },
@@ -196,29 +200,36 @@ import Layout from "../../../layouts/Layout.astro";
   typeSelect?.addEventListener("change", toggleViviendaFields);
   toggleViviendaFields();
 
-  function linesToArray(value) {
+  function linesToArray(value: string): string[] {
     return value
       .split("\n")
       .map((l) => l.trim())
       .filter(Boolean);
   }
-  function specsToArray(value) {
-    return linesToArray(value).map((line) => {
+
+  function specsToArray(value: string): [string, string][] {
+    return linesToArray(value).map((line): [string, string] => {
       const idx = line.indexOf(":");
       return idx === -1
         ? [line, ""]
         : [line.slice(0, idx).trim(), line.slice(idx + 1).trim()];
     });
   }
-  function toIntOrNull(value) {
+
+  function toIntOrNull(value: string): number | null {
     return value === "" ? null : parseInt(value, 10);
+  }
+
+  function getInput(id: string): HTMLInputElement | HTMLTextAreaElement {
+    return document.getElementById(id) as
+      HTMLInputElement | HTMLTextAreaElement;
   }
 
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     errorEl.classList.add("hidden");
     const isTerreno = typeSelect.value === "Terreno";
-    const val = (id) => document.getElementById(id).value.trim();
+    const val = (id: string) => getInput(id).value.trim();
 
     const payload = {
       slug: val("slug"),
@@ -237,9 +248,9 @@ import Layout from "../../../layouts/Layout.astro";
       land: val("land") || null,
       year: val("year") || null,
       image: val("image"),
-      gallery: linesToArray(document.getElementById("gallery").value),
-      description: linesToArray(document.getElementById("description").value),
-      specs: specsToArray(document.getElementById("specs").value),
+      gallery: linesToArray(getInput("gallery").value),
+      description: linesToArray(getInput("description").value),
+      specs: specsToArray(getInput("specs").value),
     };
 
     const { error } = await supabase.from("properties").insert(payload);

@@ -48,9 +48,11 @@ import Layout from "../../layouts/Layout.astro";
 <script>
   import { supabase } from "../../lib/supabase.js";
 
-  const guard = document.getElementById("admin-guard");
-  const content = document.getElementById("admin-content");
-  const tbody = document.getElementById("properties-tbody");
+  const guard = document.getElementById("admin-guard") as HTMLElement;
+  const content = document.getElementById("admin-content") as HTMLElement;
+  const tbody = document.getElementById(
+    "properties-tbody",
+  ) as HTMLTableSectionElement;
   const logoutBtn = document.getElementById("logout-btn");
 
   const {
@@ -81,14 +83,14 @@ import Layout from "../../layouts/Layout.astro";
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (error) {
+    if (error || !data) {
       tbody.innerHTML = `<tr><td class="px-4 py-4 text-red-600" colspan="5">Error cargando propiedades.</td></tr>`;
       return;
     }
 
     tbody.innerHTML = data
       .map(
-        (p) => `
+        (p: any) => `
       <tr class="border-b border-stone-100 last:border-0">
         <td class="px-4 py-3 font-medium text-navy-900">${p.title}</td>
         <td class="px-4 py-3">${p.property_type}</td>
