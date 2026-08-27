@@ -194,6 +194,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
           Sube las fotos directamente desde tu computador o celular.
         </p>
         <div class="flex flex-col gap-4">
+          <!-- Foto Principal -->
           <div>
             <label class="field-label" for="image">Foto principal</label>
             <input
@@ -210,16 +211,49 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
               <img id="image-preview-img" class="h-full w-full object-cover" />
             </div>
           </div>
+
+          <!-- Galería con Botón Custom + Múltiples selecciones -->
+          <!-- Fotos adicionales -->
           <div>
-            <label class="field-label" for="gallery">Fotos adicionales</label>
+            <label class="field-label" for="gallery"> Fotos adicionales </label>
+
             <input
-              class="field"
+              class="hidden"
               id="gallery"
               type="file"
               accept="image/*"
               multiple
             />
-            <div id="gallery-preview" class="mt-3 grid grid-cols-4 gap-2"></div>
+
+            <!-- Botón para agregar imágenes -->
+            <button
+              type="button"
+              id="upload-dropzone"
+              class="flex w-full cursor-pointer flex-col items-center justify-center rounded-sm border-2 border-dashed border-stone-300 bg-stone-50 p-6 transition-colors hover:border-navy-800 hover:bg-stone-100"
+            >
+              <span class="font-ui text-sm font-medium text-stone-700">
+                + Agregar fotos
+              </span>
+
+              <span class="mt-1 font-body text-xs text-stone-400">
+                Puedes seleccionar varias imágenes a la vez o agregarlas una por
+                una.
+              </span>
+            </button>
+
+            <!-- Contador -->
+            <div
+              id="gallery-count"
+              class="mt-3 hidden rounded-sm bg-stone-50 px-3 py-2 font-ui text-xs font-medium text-stone-600"
+            >
+            </div>
+
+            <!-- Lista de imágenes agregadas -->
+            <div
+              id="gallery-preview"
+              class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"
+            >
+            </div>
           </div>
         </div>
       </section>
@@ -318,7 +352,9 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
   const galleryPreview = document.getElementById(
     "gallery-preview",
   ) as HTMLElement;
+  const dropzone = document.getElementById("upload-dropzone") as HTMLElement;
 
+  // Manejo de Foto Principal
   imageInput?.addEventListener("change", () => {
     const file = imageInput.files?.[0];
     if (!file) {
@@ -329,17 +365,150 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
     imagePreview.classList.remove("hidden");
   });
 
-  galleryInput?.addEventListener("change", () => {
-    galleryPreview.innerHTML = "";
-    Array.from(galleryInput.files ?? []).forEach((file) => {
-      const img = document.createElement("img");
-      img.src = URL.createObjectURL(file);
-      img.className =
-        "h-20 w-full rounded-sm border border-stone-200 object-cover";
-      galleryPreview.appendChild(img);
-    });
+  // ============================================================
+  // GALERÍA DE FOTOS ADICIONALES
+  // ============================================================
+
+  let galleryFiles: File[] = [];
+
+  const galleryCount = document.getElementById("gallery-count") as HTMLElement;
+
+  // Abrir selector de archivos
+  dropzone?.addEventListener("click", (event) => {
+    event.preventDefault();
+    galleryInput?.click();
   });
 
+  // Cuando el usuario selecciona imágenes
+  galleryInput?.addEventListener("change", () => {
+    if (!galleryInput.files || galleryInput.files.length === 0) {
+      return;
+    }
+
+    // Convertimos FileList a array
+    const selectedFiles = Array.from(galleryInput.files);
+
+    // Agregamos las nuevas imágenes a las que ya existen
+    galleryFiles.push(...selectedFiles);
+
+    // Actualizamos la interfaz
+    renderGalleryPreview();
+
+    // Limpiamos el input.
+    // Esto permite volver a seleccionar el mismo archivo.
+    galleryInput.value = "";
+  });
+
+  function renderGalleryPreview() {
+    galleryPreview.innerHTML = "";
+
+    // Actualizar contador
+    if (galleryFiles.length === 0) {
+      galleryCount.classList.add("hidden");
+      galleryCount.textContent = "";
+      return;
+    }
+
+    galleryCount.classList.remove("hidden");
+
+    galleryCount.textContent =
+      galleryFiles.length === 1
+        ? "1 foto adicional seleccionada"
+        : `${galleryFiles.length} fotos adicionales seleccionadas`;
+
+    // Crear una tarjeta por cada imagen
+    galleryFiles.forEach((file, index) => {
+      const container = document.createElement("div");
+
+      container.className =
+        "relative overflow-hidden rounded-sm border border-stone-200 bg-white";
+
+      // --------------------------------------------------------
+      // PREVISUALIZACIÓN
+      // --------------------------------------------------------
+
+      const imageContainer = document.createElement("div");
+
+      imageContainer.className = "relative h-32 w-full";
+
+      const img = document.createElement("img");
+
+      img.src = URL.createObjectURL(file);
+      img.alt = file.name;
+
+      img.className = "h-full w-full object-cover";
+
+      imageContainer.appendChild(img);
+
+      // --------------------------------------------------------
+      // NÚMERO DE IMAGEN
+      // --------------------------------------------------------
+
+      const number = document.createElement("span");
+
+      number.className =
+        "absolute left-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-xs font-bold text-navy-900 shadow";
+
+      number.textContent = String(index + 1);
+
+      imageContainer.appendChild(number);
+
+      // --------------------------------------------------------
+      // BOTÓN ELIMINAR
+      // --------------------------------------------------------
+
+      const removeBtn = document.createElement("button");
+
+      removeBtn.type = "button";
+      removeBtn.textContent = "×";
+      removeBtn.title = "Eliminar esta foto";
+
+      removeBtn.className =
+        "absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-600 text-lg font-bold leading-none text-white shadow hover:bg-red-700";
+
+      removeBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Eliminar la imagen del array
+        galleryFiles.splice(index, 1);
+
+        // Volver a dibujar
+        renderGalleryPreview();
+      });
+
+      imageContainer.appendChild(removeBtn);
+
+      // --------------------------------------------------------
+      // NOMBRE DEL ARCHIVO
+      // --------------------------------------------------------
+
+      const fileInfo = document.createElement("div");
+
+      fileInfo.className = "border-t border-stone-200 px-2 py-2";
+
+      const fileName = document.createElement("p");
+
+      fileName.className = "truncate font-body text-xs text-stone-600";
+
+      fileName.title = file.name;
+
+      fileName.textContent = file.name;
+
+      fileInfo.appendChild(fileName);
+
+      // --------------------------------------------------------
+      // AGREGAR TODO
+      // --------------------------------------------------------
+
+      container.appendChild(imageContainer);
+      container.appendChild(fileInfo);
+
+      galleryPreview.appendChild(container);
+    });
+  }
+
+  // Verificación de sesión Supabase
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -380,6 +549,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
       )?.value ?? "Casa"
     );
   }
+
   function getOperationValue(): string {
     return (
       (
@@ -397,6 +567,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
       ? "Los terrenos no requieren habitaciones ni baños."
       : "Deja en blanco lo que no aplique.";
   }
+
   document
     .querySelectorAll('input[name="property_type"]')
     .forEach((el) => el.addEventListener("change", toggleViviendaFields));
@@ -408,6 +579,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
       .map((l) => l.trim())
       .filter(Boolean);
   }
+
   function specsToArray(value: string): [string, string][] {
     return linesToArray(value).map((line): [string, string] => {
       const idx = line.indexOf(":");
@@ -416,14 +588,17 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
         : [line.slice(0, idx).trim(), line.slice(idx + 1).trim()];
     });
   }
+
   function toIntOrNull(value: string): number | null {
     return value === "" ? null : parseInt(value, 10);
   }
+
   function getInput(id: string): HTMLInputElement | HTMLTextAreaElement {
     return document.getElementById(id) as
       HTMLInputElement | HTMLTextAreaElement;
   }
 
+  // Submit del Formulario
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     errorEl.classList.add("hidden");
@@ -449,12 +624,12 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
         finalSlug,
       );
 
+      // Subida masiva leyendo el arreglo acumulado galleryFiles
       let galleryUrls: string[] = [];
-      if (galleryInput.files && galleryInput.files.length > 0) {
-        const uploaded = await uploadPropertyImages(
-          galleryInput.files,
-          finalSlug,
-        );
+
+      if (galleryFiles.length > 0) {
+        const uploaded = await uploadPropertyImages(galleryFiles, finalSlug);
+
         galleryUrls = uploaded.map((u) => u.url);
       }
 
@@ -476,8 +651,12 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
         built: isTerreno ? null : val("built") || null,
         land: val("land") || null,
         year: val("year") || null,
+
         image: mainImageUrl,
+
+        // SOLO las imágenes que quedaron en la vista previa
         gallery: galleryUrls,
+
         description: linesToArray(getInput("description").value),
         specs: specsToArray(getInput("specs").value),
       };

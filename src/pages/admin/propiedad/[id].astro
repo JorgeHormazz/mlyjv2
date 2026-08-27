@@ -198,15 +198,45 @@ const { id } = Astro.params;
 
           <div>
             <p class="field-label !mb-3">Fotos adicionales</p>
-            <div id="gallery-current" class="mb-3 grid grid-cols-4 gap-2"></div>
-            <label class="field-label" for="gallery">Agregar más fotos</label>
+
+            <!-- Contador -->
+            <div
+              id="gallery-count"
+              class="mb-3 hidden rounded-sm bg-stone-50 px-3 py-2 font-ui text-xs font-medium text-stone-600"
+            >
+            </div>
+
+            <!-- Fotos existentes + nuevas -->
+            <div
+              id="gallery-current"
+              class="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"
+            >
+            </div>
+
+            <!-- Input real -->
             <input
-              class="field"
+              class="hidden"
               id="gallery"
               type="file"
               accept="image/*"
               multiple
             />
+
+            <!-- Botón agregar -->
+            <button
+              type="button"
+              id="gallery-add-btn"
+              class="flex w-full cursor-pointer flex-col items-center justify-center rounded-sm border-2 border-dashed border-stone-300 bg-stone-50 p-6 transition-colors hover:border-navy-800 hover:bg-stone-100"
+            >
+              <span class="font-ui text-sm font-medium text-stone-700">
+                + Agregar fotos
+              </span>
+
+              <span class="mt-1 font-body text-xs text-stone-400">
+                Puedes seleccionar varias imágenes a la vez o agregarlas una por
+                una.
+              </span>
+            </button>
           </div>
         </div>
       </section>
@@ -326,10 +356,24 @@ const { id } = Astro.params;
   const galleryCurrentEl = document.getElementById(
     "gallery-current",
   ) as HTMLElement;
+
   const galleryInput = document.getElementById("gallery") as HTMLInputElement;
 
+  const galleryAddBtn = document.getElementById(
+    "gallery-add-btn",
+  ) as HTMLButtonElement;
+
+  const galleryCount = document.getElementById("gallery-count") as HTMLElement;
+
   let propertySlug = "";
+
+  // Fotos que ya estaban guardadas
   let galleryUrls: string[] = [];
+
+  // Fotos nuevas seleccionadas por el usuario
+  let galleryFiles: File[] = [];
+
+  // Fotos existentes que el usuario eliminó
   const galleryUrlsToDelete: string[] = [];
 
   imageInput?.addEventListener("change", () => {
@@ -339,24 +383,220 @@ const { id } = Astro.params;
 
   function renderGalleryCurrent() {
     galleryCurrentEl.innerHTML = "";
-    galleryUrls.forEach((url) => {
-      const wrap = document.createElement("div");
-      wrap.className = "relative";
-      wrap.innerHTML = `
-        <img src="${url}" class="h-20 w-full rounded-sm border border-stone-200 object-cover" />
-        <button type="button" data-url="${url}" class="gallery-delete absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">×</button>
-      `;
-      galleryCurrentEl.appendChild(wrap);
-    });
-    galleryCurrentEl.querySelectorAll(".gallery-delete").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const url = (btn as HTMLElement).dataset.url!;
-        galleryUrls = galleryUrls.filter((u) => u !== url);
-        galleryUrlsToDelete.push(url);
+
+    const totalPhotos = galleryUrls.length + galleryFiles.length;
+
+    // ----------------------------------------------------------
+    // CONTADOR
+    // ----------------------------------------------------------
+
+    if (totalPhotos === 0) {
+      galleryCount.classList.add("hidden");
+      galleryCount.textContent = "";
+    } else {
+      galleryCount.classList.remove("hidden");
+
+      galleryCount.textContent =
+        totalPhotos === 1
+          ? "1 foto adicional"
+          : `${totalPhotos} fotos adicionales`;
+    }
+
+    // ----------------------------------------------------------
+    // FOTOS EXISTENTES
+    // ----------------------------------------------------------
+
+    galleryUrls.forEach((url, index) => {
+      const container = document.createElement("div");
+
+      container.className =
+        "relative overflow-hidden rounded-sm border border-stone-200 bg-white";
+
+      const imageContainer = document.createElement("div");
+
+      imageContainer.className = "relative h-32 w-full";
+
+      const img = document.createElement("img");
+
+      img.src = url;
+      img.alt = `Foto adicional ${index + 1}`;
+
+      img.className = "h-full w-full object-cover";
+
+      imageContainer.appendChild(img);
+
+      // Número
+      const number = document.createElement("span");
+
+      number.className =
+        "absolute left-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-xs font-bold text-navy-900 shadow";
+
+      number.textContent = String(index + 1);
+
+      imageContainer.appendChild(number);
+
+      // Botón eliminar
+      const removeBtn = document.createElement("button");
+
+      removeBtn.type = "button";
+      removeBtn.textContent = "×";
+      removeBtn.title = "Eliminar esta foto";
+
+      removeBtn.className =
+        "absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-600 text-lg font-bold leading-none text-white shadow hover:bg-red-700";
+
+      removeBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const urlToDelete = galleryUrls[index];
+
+        // Sacar de las fotos que se guardarán
+        galleryUrls.splice(index, 1);
+
+        // Registrar para eliminarla del Storage
+        if (!galleryUrlsToDelete.includes(urlToDelete)) {
+          galleryUrlsToDelete.push(urlToDelete);
+        }
+
         renderGalleryCurrent();
       });
+
+      imageContainer.appendChild(removeBtn);
+
+      // Información
+      const fileInfo = document.createElement("div");
+
+      fileInfo.className = "border-t border-stone-200 px-2 py-2";
+
+      const fileName = document.createElement("p");
+
+      fileName.className = "truncate font-body text-xs text-stone-600";
+
+      fileName.title = url;
+
+      fileName.textContent = "Foto existente";
+
+      fileInfo.appendChild(fileName);
+
+      container.appendChild(imageContainer);
+      container.appendChild(fileInfo);
+
+      galleryCurrentEl.appendChild(container);
+    });
+
+    // ----------------------------------------------------------
+    // FOTOS NUEVAS
+    // ----------------------------------------------------------
+
+    galleryFiles.forEach((file, index) => {
+      const container = document.createElement("div");
+
+      container.className =
+        "relative overflow-hidden rounded-sm border border-stone-200 bg-white";
+
+      const imageContainer = document.createElement("div");
+
+      imageContainer.className = "relative h-32 w-full";
+
+      const img = document.createElement("img");
+
+      img.src = URL.createObjectURL(file);
+      img.alt = file.name;
+
+      img.className = "h-full w-full object-cover";
+
+      imageContainer.appendChild(img);
+
+      // Número
+      const number = document.createElement("span");
+
+      number.className =
+        "absolute left-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-xs font-bold text-navy-900 shadow";
+
+      number.textContent = String(galleryUrls.length + index + 1);
+
+      imageContainer.appendChild(number);
+
+      // Indicador NUEVA
+      const newBadge = document.createElement("span");
+
+      newBadge.className =
+        "absolute bottom-2 left-2 rounded bg-white/90 px-2 py-1 text-[10px] font-semibold text-navy-900 shadow";
+
+      newBadge.textContent = "NUEVA";
+
+      imageContainer.appendChild(newBadge);
+
+      // Botón eliminar
+      const removeBtn = document.createElement("button");
+
+      removeBtn.type = "button";
+      removeBtn.textContent = "×";
+      removeBtn.title = "Eliminar esta foto";
+
+      removeBtn.className =
+        "absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-600 text-lg font-bold leading-none text-white shadow hover:bg-red-700";
+
+      removeBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Esta imagen todavía NO está subida.
+        // Simplemente la eliminamos del array.
+        galleryFiles.splice(index, 1);
+
+        renderGalleryCurrent();
+      });
+
+      imageContainer.appendChild(removeBtn);
+
+      // Nombre
+      const fileInfo = document.createElement("div");
+
+      fileInfo.className = "border-t border-stone-200 px-2 py-2";
+
+      const fileName = document.createElement("p");
+
+      fileName.className = "truncate font-body text-xs text-stone-600";
+
+      fileName.title = file.name;
+
+      fileName.textContent = file.name;
+
+      fileInfo.appendChild(fileName);
+
+      container.appendChild(imageContainer);
+      container.appendChild(fileInfo);
+
+      galleryCurrentEl.appendChild(container);
     });
   }
+
+  // ============================================================
+  // AGREGAR FOTOS NUEVAS
+  // ============================================================
+
+  galleryAddBtn?.addEventListener("click", (event) => {
+    event.preventDefault();
+    galleryInput?.click();
+  });
+
+  galleryInput?.addEventListener("change", () => {
+    if (!galleryInput.files || galleryInput.files.length === 0) {
+      return;
+    }
+
+    // Agregar las nuevas fotos al arreglo
+    galleryFiles.push(...Array.from(galleryInput.files));
+
+    // Actualizar inmediatamente la vista
+    renderGalleryCurrent();
+
+    // Limpiar input para poder volver a seleccionar
+    // incluso las mismas imágenes
+    galleryInput.value = "";
+  });
 
   const {
     data: { session },
@@ -441,6 +681,7 @@ const { id } = Astro.params;
     (document.getElementById("year") as HTMLInputElement).value = p.year ?? "";
     currentImageEl.src = p.image;
     galleryUrls = [...(p.gallery ?? [])];
+    galleryFiles = [];
     renderGalleryCurrent();
     (document.getElementById("description") as HTMLTextAreaElement).value = (
       p.description ?? []
@@ -505,12 +746,14 @@ const { id } = Astro.params;
       }
 
       let finalGallery = [...galleryUrls];
-      if (galleryInput.files && galleryInput.files.length > 0) {
-        if (submitBtn) submitBtn.textContent = "Subiendo fotos adicionales...";
-        const uploaded = await uploadPropertyImages(
-          galleryInput.files,
-          propertySlug,
-        );
+
+      if (galleryFiles.length > 0) {
+        if (submitBtn) {
+          submitBtn.textContent = "Subiendo fotos adicionales...";
+        }
+
+        const uploaded = await uploadPropertyImages(galleryFiles, propertySlug);
+
         finalGallery = [...finalGallery, ...uploaded.map((u) => u.url)];
       }
 
