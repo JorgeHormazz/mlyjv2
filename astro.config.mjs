@@ -1,10 +1,10 @@
 import { defineConfig } from "astro/config";
 import tailwind from "@astrojs/tailwind";
-import node from "@astrojs/node";
+import vercel from "@astrojs/vercel/serverless";
 
 export default defineConfig({
-  site: "https://mlyjvcorretajes.cl",
-  output: "server", // necesario para leer Supabase en cada request
-  adapter: node({ mode: "standalone" }), // cambia por @astrojs/vercel o @astrojs/netlify según tu hosting
+  site: "https://propiedadesmlyjv.cl",
+  output: "server",
+  adapter: vercel(),
   integrations: [tailwind({ applyBaseStyles: false })],
 });
