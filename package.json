@@ -1,7 +1,10 @@
 {
-  "name": "propiedadesmlyjv",
+  "name": "ml-y-jv-corretajes",
   "type": "module",
   "version": "1.0.0",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
