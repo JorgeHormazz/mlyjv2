@@ -69,6 +69,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
 
 <script>
   import { supabase } from "../../lib/supabase.js";
+  import { deletePropertyFolder } from "../../lib/storage.js";
 
   const guard = document.getElementById("admin-guard") as HTMLElement;
   const content = document.getElementById("admin-content") as HTMLElement;
@@ -157,6 +158,8 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
           .from("properties")
           .delete()
           .eq("id", id);
+        const p = data.find((x: any) => x.id === id);
+        if (p?.slug) await deletePropertyFolder(p.slug);
         if (delError) {
           alert("No se pudo eliminar: " + delError.message);
           return;
