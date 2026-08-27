@@ -1,6 +1,6 @@
 import { supabase } from "./supabase.js";
 
-const BUCKET = "Propiedades";
+const BUCKET = "property-images";
 
 /** Sube un archivo a una carpeta (normalmente el slug de la propiedad) y devuelve su URL pública. */
 export async function uploadPropertyImage(file, folder) {
