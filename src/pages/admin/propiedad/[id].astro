@@ -105,6 +105,18 @@ const { id } = Astro.params;
               </datalist>
             </div>
           </div>
+          <div>
+            <label class="field-label" for="display_order"
+              >Orden de aparición (opcional)</label
+            >
+            <input
+              class="field"
+              id="display_order"
+              type="number"
+              min="0"
+              placeholder="Ej: 1 (más bajo = aparece primero)"
+            />
+          </div>
         </div>
       </section>
 
@@ -333,6 +345,7 @@ const { id } = Astro.params;
     gallery?: string[];
     description?: string[];
     specs?: [string, string][];
+    display_order?: number | null;
   }
 
   const guard = document.getElementById("admin-guard") as HTMLDivElement;
@@ -692,6 +705,8 @@ const { id } = Astro.params;
       .map(([l, v]) => `${l}: ${v}`)
       .join("\n");
     toggleViviendaFields();
+    (document.getElementById("display_order") as HTMLInputElement).value =
+      p.display_order?.toString() ?? "";
   }
 
   function toggleViviendaFields() {
@@ -779,6 +794,10 @@ const { id } = Astro.params;
         year: val("year") || null,
         image: imageUrl,
         gallery: finalGallery,
+        display_order:
+          val("display_order") === ""
+            ? null
+            : parseInt(val("display_order"), 10),
         description: linesToArray(
           (document.getElementById("description") as HTMLTextAreaElement).value,
         ),

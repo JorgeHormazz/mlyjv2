@@ -71,22 +71,22 @@ export const site = {
   services: [
     {
       title: "Casas y Departamentos",
-      text: "Seleccionados bajo estrictos criterios de habitabilidad y ubicación.",
+      text: "Ubicación y habitabilidad, sin concesiones.",
       icon: "M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25",
     },
     {
       title: "Terrenos y Parcelas",
-      text: "Evaluados detalladamente por su plusvalía y potencial de desarrollo en Ñuble y el país.",
+      text: "Evaluados por su plusvalía y potencial real.",
       icon: "M3.75 21h16.5M4.5 3h15l-.75 6.75H5.25L4.5 3zm.75 6.75L3 21m16.5-11.25L21 21M9 21v-6.75h6V21",
     },
     {
-      title: "Galpones e Inmuebles Comerciales",
-      text: "Espacios eficientes para el desarrollo logístico e industrial.",
+      title: "Galpones Comerciales",
+      text: "Espacios pensados para logística e industria.",
       icon: "M2.25 21h19.5M3 21V9.75L12 4.5l9 5.25V21M9 21v-6a1.5 1.5 0 011.5-1.5h3A1.5 1.5 0 0115 15v6M8.25 12.75h.008v.008H8.25v-.008zm7.5 0h.008v.008h-.008v-.008z",
     },
     {
       title: "Proyectos de Inversión",
-      text: "Oportunidades seleccionadas dentro y fuera de Chile para hacer crecer tu patrimonio.",
+      text: "Oportunidades dentro y fuera de Chile.",
       icon: "M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22m0 0l-5.94-2.281m5.94 2.28l-2.28 5.941",
     },
   ],

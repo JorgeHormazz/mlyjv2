@@ -38,17 +38,17 @@ const { property, featured = false } = Astro.props;
     >
     </div>
 
-    <div class="absolute left-4 top-4 flex gap-2">
+    <div class="absolute left-4 right-4 top-4 flex flex-wrap gap-2">
       {
         property.operation && (
-          <span class="rounded-full bg-navy-950/80 px-3 py-1 font-ui text-[10px] font-bold uppercase tracking-wider text-paper backdrop-blur-sm">
+          <span class="max-w-full rounded-sm bg-navy-950/80 px-3 py-1 font-ui text-[10px] font-bold uppercase tracking-wider text-paper backdrop-blur-sm">
             {property.operation}
           </span>
         )
       }
       {
         property.tag && (
-          <span class="rounded-full bg-gold px-3 py-1 font-ui text-[10px] font-bold uppercase tracking-wider text-navy-950 shadow-sm">
+          <span class="line-clamp-2 max-w-full rounded-sm bg-gold px-3 py-1 font-ui text-[10px] font-bold uppercase leading-snug tracking-wide text-navy-950 shadow-sm">
             {property.tag}
           </span>
         )
@@ -68,12 +68,12 @@ const { property, featured = false } = Astro.props;
   <div class="flex flex-1 flex-col gap-3 p-5">
     <div>
       <h3
-        class="font-display text-lg font-semibold leading-snug text-navy-900 transition-colors group-hover:text-gold-dark"
+        class="line-clamp-2 font-display text-lg font-semibold leading-snug text-navy-900 transition-colors group-hover:text-gold-dark"
       >
         {property.title}
       </h3>
       <p
-        class="mt-1 flex items-center gap-1.5 font-body text-sm text-stone-500"
+        class="mt-1 flex items-center gap-1.5 truncate font-body text-sm text-stone-500"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
